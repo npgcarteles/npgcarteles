@@ -5,7 +5,7 @@ import spaceBg from "@/assets/space-bg.jpg";
 import alien from "@/assets/alien.png";
 import npgLogo from "@/assets/npg-logo.png.asset.json";
 import { streamImage } from "@/lib/stream-image";
-import { buildPrompt, ILUMINACION, TAMANOS, TIPOS, type SignConfig } from "@/lib/sign-prompt";
+import { buildPrompt, ILUMINACION, TIPOS, type SignConfig } from "@/lib/sign-prompt";
 
 const WHATSAPP = "5492975169780";
 
@@ -186,15 +186,19 @@ function SectionTitle({ kicker, title, sub }: { kicker?: string; title: React.Re
 function Index() {
   const [foto, setFoto] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
-  const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "Mediano (2 m)", colores: "", iluminacion: "Escena nocturna encendido", notas: "" });
+  const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "3 m de ancho x 0.8 m de alto", colores: "", iluminacion: "Escena nocturna encendido", notas: "" });
   const [result, setResult] = useState<string | null>(null);
   const [final, setFinal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ancho, setAncho] = useState("3");
+  const [alto, setAlto] = useState("0.8");
+  const setMedida = (a: string, h: string) => { setAncho(a); setAlto(h); setCfg((c) => ({ ...c, tamano: `${a || "?"} m de ancho x ${h || "?"} m de alto` })); };
   const set = (k: keyof SignConfig) => (v: string) => setCfg((c) => ({ ...c, [k]: v }));
 
   async function generar() {
     if (!foto || !logo) return setError("Subí la foto del local y el logo.");
+    if (!(Number(ancho) > 0) || !(Number(alto) > 0)) return setError("Ingresá el ancho y el alto del cartel en metros.");
     setError(null); setLoading(true); setResult(null); setFinal(false);
     const form = new FormData();
     form.append("prompt", buildPrompt(cfg));
@@ -290,7 +294,17 @@ function Index() {
                     ))}
                   </div>
                 </div>
-                <div><p className="mb-3 text-sm font-semibold text-muted-foreground">Tamaño</p><Chips options={TAMANOS} value={cfg.tamano} onChange={set("tamano")} /></div>
+                <div>
+                  <p className="mb-3 text-sm font-semibold text-muted-foreground">Medidas del cartel (metros)</p>
+                  <div className="grid grid-cols-2 gap-4 sm:max-w-md">
+                    <label className="grid gap-2"><span className="text-sm">Ancho</span>
+                      <input type="number" min="0.1" step="0.1" inputMode="decimal" value={ancho} onChange={(e) => setMedida(e.target.value, alto)} className="rounded-xl border border-input bg-muted/60 px-4 py-3 outline-none transition focus:border-neon" />
+                    </label>
+                    <label className="grid gap-2"><span className="text-sm">Alto</span>
+                      <input type="number" min="0.1" step="0.1" inputMode="decimal" value={alto} onChange={(e) => setMedida(ancho, e.target.value)} className="rounded-xl border border-input bg-muted/60 px-4 py-3 outline-none transition focus:border-neon" />
+                    </label>
+                  </div>
+                </div>
                 <div><p className="mb-3 text-sm font-semibold text-muted-foreground">Iluminación</p><Chips options={ILUMINACION} value={cfg.iluminacion} onChange={set("iluminacion")} /></div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="grid gap-2"><span className="text-sm font-semibold text-muted-foreground">Colores</span>

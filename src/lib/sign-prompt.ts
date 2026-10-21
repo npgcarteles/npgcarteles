@@ -27,7 +27,8 @@ const ESTILO: Record<string, string> = {
 export function buildPrompt(c: SignConfig) {
   return [
     "Image 1 is a photo of a real storefront. Image 2 is the business logo.",
-    `Photorealistically install a new exterior sign on the storefront facade. Construction style: ${ESTILO[c.tipo] ?? c.tipo}. Approximate width: ${c.tamano}.`,
+    `Photorealistically install a new, real, physically built exterior sign on the storefront facade. Construction style: ${ESTILO[c.tipo] ?? c.tipo}. Exact sign dimensions: ${c.tamano}. Estimate the real-world scale from the door (about 2.1 m tall) and other facade elements, and size the sign to exactly those measurements, keeping its width-to-height proportion.`,
+    "Make it look like a professionally manufactured and installed sign: real materials, visible thickness/depth, mounting hardware, edges, accurate perspective, contact shadows on the wall, and light falloff consistent with the scene. It must not look pasted or flat.",
     `Reproduce the logo from image 2 faithfully (same shapes, text and proportions) as the sign content. Colors: ${c.colores || "the logo's original colors"}.`,
     `Lighting: ${c.iluminacion}. Match perspective, scale, shadows, reflections and materials realistically.`,
     c.notas ? `Extra notes: ${c.notas}.` : "",
