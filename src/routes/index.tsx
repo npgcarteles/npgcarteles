@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 const MAX_PRUEBAS = 2;
-const ANCHOS = ["1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5"];
+const ANCHOS = ["2", "2.5", "3", "3.5", "4", "4.5", "5"];
 const ALTOS = ["0.3", "0.4", "0.5", "0.6", "0.8", "1"];
 import { Award, Box, Brush, Check, Download, HeartHandshake, ImagePlus, Lightbulb, Loader2, Menu, MessageCircle, Palette, PenTool, Printer, Rocket, Sparkles, Store, Users, X, Layers, Wand2 } from "lucide-react";
 import spaceBg from "@/assets/space-bg.jpg";
