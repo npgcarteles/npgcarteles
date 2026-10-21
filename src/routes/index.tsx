@@ -32,13 +32,13 @@ const NAV = [
 ];
 
 const SERVICIOS = [
-  { icon: Store, label: "Cartelería comercial" },
-  { icon: Lightbulb, label: "Corpóreos LED" },
-  { icon: Printer, label: "Impresión en vinilo" },
-  { icon: Layers, label: "Backlight y Polyfan" },
-  { icon: Box, label: "Impresión 3D" },
-  { icon: PenTool, label: "Diseño de logos" },
-  { icon: Brush, label: "Rediseño de fachadas" },
+  { icon: Store, label: "Cartelería comercial", desc: "Carteles para frentes de locales, oficinas y comercios. Diseñamos, fabricamos e instalamos la identificación de tu negocio para que se vea desde lejos y transmita tu marca." },
+  { icon: Lightbulb, label: "Corpóreos LED", desc: "Letras y logos en volumen (relieve 3D) con iluminación LED interna o trasera. Le dan a tu fachada un aspecto premium de día y una presencia impactante de noche." },
+  { icon: Printer, label: "Impresión en vinilo", desc: "Vinilos impresos o de corte para vidrieras, vehículos, paredes y carteles. Una forma versátil y económica de comunicar promociones, horarios o tu identidad." },
+  { icon: Layers, label: "Backlight y Polyfan", desc: "Carteles con lona o polyfan tensado e iluminación desde adentro. La imagen se ve pareja y luminosa, ideal para gráficas grandes visibles a toda hora." },
+  { icon: Box, label: "Impresión 3D", desc: "Piezas, logos y letras impresas en 3D a medida. Permite formas complejas y detalles que serían difíciles con otros materiales." },
+  { icon: PenTool, label: "Diseño de logos", desc: "Creamos o renovamos el logo de tu marca, pensado para que funcione bien en carteles, redes, papelería y cualquier soporte." },
+  { icon: Brush, label: "Rediseño de fachadas", desc: "Proponemos una nueva imagen para el frente de tu local: cartelería, colores e iluminación integrados para que tu negocio se destaque en la cuadra." },
 ];
 
 const POR_QUE = [
@@ -95,6 +95,34 @@ function Nav() {
         </ul>
       )}
     </nav>
+  );
+}
+
+function Servicios() {
+  const [sel, setSel] = useState<number | null>(1);
+  const cur = sel !== null ? SERVICIOS[sel] : null;
+  return (
+    <>
+      <div className="-mx-5 flex snap-x gap-4 overflow-x-auto px-5 pb-4 lg:mx-0 lg:grid lg:grid-cols-7 lg:overflow-visible lg:px-0">
+        {SERVICIOS.map(({ icon: I, label }, i) => (
+          <button key={label} type="button" aria-pressed={sel === i} onClick={() => setSel(sel === i ? null : i)}
+            className={`group min-w-[150px] snap-start rounded-2xl border p-5 text-center transition hover:-translate-y-1 hover:border-neon hover:shadow-glow ${sel === i ? "border-neon bg-accent shadow-glow" : "border-border bg-card"}`}>
+            <I className="mx-auto h-8 w-8 text-neon transition group-hover:text-primary-glow" strokeWidth={1.5} />
+            <p className="mt-3 text-sm font-semibold">{label}</p>
+          </button>
+        ))}
+      </div>
+      {cur && (
+        <div key={cur.label} className="mt-4 flex animate-rise flex-col gap-4 rounded-2xl border border-neon/50 bg-card p-6 sm:flex-row sm:items-center md:p-8">
+          <cur.icon className="h-12 w-12 shrink-0 text-primary-glow" strokeWidth={1.5} />
+          <div className="flex-1">
+            <h3 className="text-xl md:text-2xl"><span className="text-gradient">{cur.label}</span></h3>
+            <p className="mt-2 text-muted-foreground">{cur.desc}</p>
+          </div>
+          <a href="#crear" className="rounded-full bg-gradient-brand px-6 py-3 text-center font-display text-xs text-primary-foreground shadow-glow">Armá tu cartel</a>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -218,14 +246,7 @@ function Index() {
       {/* SERVICIOS */}
       <section id="servicios" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20">
         <SectionTitle kicker="SERVICIOS" title={<>Todo para que tu marca <span className="text-gradient">destaque</span></>} />
-        <div className="-mx-5 flex snap-x gap-4 overflow-x-auto px-5 pb-4 lg:mx-0 lg:grid lg:grid-cols-7 lg:overflow-visible lg:px-0">
-          {SERVICIOS.map(({ icon: I, label }) => (
-            <div key={label} className="group min-w-[150px] snap-start rounded-2xl border border-border bg-card p-5 text-center transition hover:-translate-y-1 hover:border-neon hover:shadow-glow">
-              <I className="mx-auto h-8 w-8 text-neon transition group-hover:text-primary-glow" strokeWidth={1.5} />
-              <p className="mt-3 text-sm font-semibold">{label}</p>
-            </div>
-          ))}
-        </div>
+        <Servicios />
       </section>
 
       {/* CONFIGURADOR */}
