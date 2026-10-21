@@ -110,3 +110,9 @@ export async function editImage(config: ImageConfig, form: FormData, signal?: Ab
     signal: signal ?? null,
   });
 }
+
+export const imageSettings: Omit<ImageConfig, "apiKey"> = {
+  baseURL: "https://ai.gateway.lovable.dev",
+  model: "openai/gpt-image-2.5-sunburst",
+  format: "openai",
+};
