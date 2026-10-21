@@ -355,6 +355,7 @@ function Index() {
                 <img src={result} alt="Simulación del cartel" className={`mt-6 w-full rounded-2xl border border-border transition-[filter] duration-700 ${final ? "blur-0" : "blur-2xl"}`} />
               ) : null}
               {result && <p className="mt-3 text-sm font-semibold">{ancho} m × {alto} m · {surface.measured ? "Escala calibrada con referencia declarada por el cliente" : "Vista ilustrativa: escala real no verificada"}</p>}
+              {result && <p className="mt-2 text-xs text-muted-foreground">El logo conserva sus proporciones dentro de estas medidas; puede dejar espacio libre. El montaje no elimina carteles existentes ni reproduce materiales y volumen de fabricación.</p>}
               {result && (
                 <p role="note" className="mt-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-xs leading-5 text-muted-foreground">
                   <strong className="text-foreground">Aviso importante:</strong> Este contenido visual corresponde a una simulación gráfica optimizada. Ha sido generado exclusivamente como una muestra de referencia estética, por lo que no constituye una oferta contractual ni una réplica exacta del entregable final.

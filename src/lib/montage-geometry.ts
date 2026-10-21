@@ -11,6 +11,7 @@ export function dimensions(widthM: number, heightM: number): Dimensions {
 export function validateSurface(s: Surface) {
   if (s.corners.length !== 4 || s.corners.some((p) => !Number.isFinite(p.x) || !Number.isFinite(p.y) || p.x < 0 || p.x > 1 || p.y < 0 || p.y > 1)) throw new Error("Marcá las cuatro esquinas de una superficie rectangular.");
   if (!Number.isFinite(s.widthM) || !Number.isFinite(s.heightM) || s.widthM <= 0 || s.heightM <= 0) throw new Error("Ingresá las medidas reales de la superficie.");
+  if (![s.center.x,s.center.y].every((v)=>Number.isFinite(v)&&v>=0&&v<=1)) throw new Error("La ubicación debe estar dentro de la superficie marcada.");
   const turns = s.corners.map((a, i) => { const b = s.corners[(i + 1) % 4]; const c = s.corners[(i + 2) % 4]; return b && c ? (b.x-a.x)*(c.y-b.y)-(b.y-a.y)*(c.x-b.x) : 0; });
   if (turns.some((v) => v <= 0.0001)) throw new Error("Las esquinas deben formar un rectángulo en perspectiva, sin cruzarse y en sentido horario.");
 }
