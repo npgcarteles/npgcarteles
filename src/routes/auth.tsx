@@ -8,7 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 const safe = (r?: string) => (r && r.startsWith("/") && !r.startsWith("//") ? r : "/pedidos");
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>) => ({ redirect: typeof s["redirect"] === "string" ? (s["redirect"] as string) : undefined }),
+  validateSearch: (s: Record<string, unknown>): { redirect?: string | undefined } => ({ redirect: typeof s["redirect"] === "string" ? (s["redirect"] as string) : undefined }),
   head: () => ({
     meta: [
       { title: "Ingresar — NPG Studio" },

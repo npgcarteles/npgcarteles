@@ -10,10 +10,10 @@ import { formatARS, STATUS_LABEL, STATUS_MESSAGE, type OrderConfig, type Payment
 const ANCHOS = [2, 2.5, 3, 3.5, 4, 4.5, 5];
 const ALTOS = [0.3, 0.4, 0.5, 0.6, 0.8, 1];
 
-export const orderQuery = (id: string) => queryOptions({ queryKey: ["order", id], queryFn: () => getOrder({ data: { id } }) });
+const orderQuery = (id: string) => queryOptions({ queryKey: ["order", id], queryFn: () => getOrder({ data: { id } }) });
 
 export const Route = createFileRoute("/_authenticated/pedidos/$id")({
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): { payment_id?: string | undefined } => ({
     payment_id: typeof s["payment_id"] === "string" || typeof s["payment_id"] === "number" ? String(s["payment_id"]) : undefined,
   }),
   loader: ({ context, params }) => context.queryClient.ensureQueryData(orderQuery(params.id)),
