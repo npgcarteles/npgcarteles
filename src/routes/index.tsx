@@ -337,7 +337,6 @@ function Index() {
                 <div className="grid gap-4">
                   <p className="text-sm font-semibold text-muted-foreground">Medidas del cartel</p>
                   <div><p className="mb-2 text-sm">Ancho</p><Chips options={ANCHOS.map((a) => `${a} m`)} value={`${ancho} m`} onChange={(v) => { const a = v.replace(" m", ""); setMedida(a, ALTO_POR_ANCHO[a] ?? "0.6"); }} /></div>
-                  <p className="text-sm text-muted-foreground">Alto automático según el ancho: <span className="font-semibold text-foreground">{alto} m</span></p>
                 </div>
                 <div><p className="mb-3 text-sm font-semibold text-muted-foreground">Iluminación</p><Chips options={ILUMINACION} value={cfg.iluminacion} onChange={set("iluminacion")} />
                   <p className="mt-2 text-xs text-muted-foreground">¿Necesitás otro tipo de LED? <a href={waContact} target="_blank" rel="noreferrer" className="text-neon underline">Escribinos por privado</a>.</p></div>
