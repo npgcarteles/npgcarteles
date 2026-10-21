@@ -13,6 +13,7 @@ export type OrderConfig = {
   colores: string;
   iluminacion: string;
   notas: string;
+  montaje?: { corners: {x: number; y: number}[]; widthM: number; heightM: number; measured: boolean; center: {x: number; y: number}; method: "planar_homography" };
 };
 
 export type Contacto = { nombre: string; email: string; telefono: string; ciudad?: string };
