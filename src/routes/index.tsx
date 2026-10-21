@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Award, Box, Brush, Check, Download, HeartHandshake, ImagePlus, Lightbulb, Loader2, Menu, MessageCircle, Palette, PenTool, Printer, Rocket, Sparkles, Store, Users, X, Layers, Wand2 } from "lucide-react";
 import spaceBg from "@/assets/space-bg.jpg";
 import alien from "@/assets/alien.png";
-import logo from "@/assets/npg-logo.png.asset.json";
+import npgLogo from "@/assets/npg-logo.png.asset.json";
 import { streamImage } from "@/lib/stream-image";
 import { buildPrompt, ILUMINACION, TAMANOS, TIPOS, type SignConfig } from "@/lib/sign-prompt";
 
@@ -77,7 +77,7 @@ function Nav() {
   return (
     <nav className="glass fixed inset-x-0 top-0 z-50 border-b border-border">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-        <a href="#inicio" aria-label="NPG Diseño & Cartelería — Inicio"><img src={logo.url} alt="NPG Diseño & Cartelería" width={672} height={679} className="h-11 w-auto" /></a>
+        <a href="#inicio" aria-label="NPG Diseño & Cartelería — Inicio"><img src={npgLogo.url} alt="NPG Diseño & Cartelería" width={672} height={679} className="h-11 w-auto" /></a>
         <ul className="hidden gap-7 text-sm md:flex">
           {NAV.map((n) => (
             <li key={n.id}><a href={`#${n.id}`} className="text-muted-foreground transition hover:text-foreground">{n.label}</a></li>
@@ -200,7 +200,7 @@ function Index() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40" />
         <div className="relative mx-auto grid w-full max-w-6xl items-center gap-6 px-5 py-12 md:grid-cols-2">
           <div className="animate-rise text-center md:text-left">
-            <img src={logo.url} alt="NPG Diseño & Cartelería" width={672} height={679} className="mx-auto mb-6 h-24 w-auto drop-shadow-[0_0_24px_rgba(118,43,255,0.6)] md:mx-0 md:h-32" />
+            <img src={npgLogo.url} alt="NPG Diseño & Cartelería" width={672} height={679} className="mx-auto mb-6 h-24 w-auto drop-shadow-[0_0_24px_rgba(118,43,255,0.6)] md:mx-0 md:h-32" />
             <h1 className="text-[2.6rem] leading-[1.02] sm:text-6xl lg:text-7xl">
               Armá tu cartel<br /><span className="text-gradient">corpóreo LED</span>
             </h1>
