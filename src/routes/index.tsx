@@ -186,19 +186,22 @@ function SectionTitle({ kicker, title, sub }: { kicker?: string; title: React.Re
 function Index() {
   const [foto, setFoto] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
-  const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "3 m de ancho x 0.8 m de alto", colores: "", iluminacion: "Escena nocturna encendido", notas: "" });
+  const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "3 m de ancho x 0.8 m de alto", colores: "", iluminacion: ILUMINACION[0], notas: "" });
   const [result, setResult] = useState<string | null>(null);
   const [final, setFinal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ancho, setAncho] = useState("3");
   const [alto, setAlto] = useState("0.8");
-  const setMedida = (a: string, h: string) => { setAncho(a); setAlto(h); setCfg((c) => ({ ...c, tamano: `${a || "?"} m de ancho x ${h || "?"} m de alto` })); };
+  const [usadas, setUsadas] = useState(0);
+  useEffect(() => { setUsadas(Number(localStorage.getItem("npg-pruebas") || 0)); }, []);
+  const restantes = Math.max(0, MAX_PRUEBAS - usadas);
+  const setMedida = (a: string, h: string) => { setAncho(a); setAlto(h); setCfg((c) => ({ ...c, tamano: `${a} m de ancho x ${h} m de alto` })); };
   const set = (k: keyof SignConfig) => (v: string) => setCfg((c) => ({ ...c, [k]: v }));
 
   async function generar() {
+    if (restantes <= 0) return setError("Ya usaste tus 2 pruebas con IA. Escribinos por WhatsApp para seguir con tu proyecto.");
     if (!foto || !logo) return setError("Subí la foto del local y el logo.");
-    if (!(Number(ancho) > 0) || !(Number(alto) > 0)) return setError("Ingresá el ancho y el alto del cartel en metros.");
     setError(null); setLoading(true); setResult(null); setFinal(false);
     const form = new FormData();
     form.append("prompt", buildPrompt(cfg));
@@ -206,6 +209,8 @@ function Index() {
     form.append("image[]", logo);
     try {
       await streamImage("/api/edit-image", form, (src, isFinal) => { setResult(src); setFinal(isFinal); });
+      const n = usadas + 1;
+      localStorage.setItem("npg-pruebas", String(n)); setUsadas(n);
     } catch (e) {
       setError(e instanceof Error ? e.message : "No se pudo generar la simulación.");
     } finally {
@@ -294,18 +299,13 @@ function Index() {
                     ))}
                   </div>
                 </div>
-                <div>
-                  <p className="mb-3 text-sm font-semibold text-muted-foreground">Medidas del cartel (metros)</p>
-                  <div className="grid grid-cols-2 gap-4 sm:max-w-md">
-                    <label className="grid gap-2"><span className="text-sm">Ancho</span>
-                      <input type="number" min="0.1" step="0.1" inputMode="decimal" value={ancho} onChange={(e) => setMedida(e.target.value, alto)} className="rounded-xl border border-input bg-muted/60 px-4 py-3 outline-none transition focus:border-neon" />
-                    </label>
-                    <label className="grid gap-2"><span className="text-sm">Alto</span>
-                      <input type="number" min="0.1" step="0.1" inputMode="decimal" value={alto} onChange={(e) => setMedida(ancho, e.target.value)} className="rounded-xl border border-input bg-muted/60 px-4 py-3 outline-none transition focus:border-neon" />
-                    </label>
-                  </div>
+                <div className="grid gap-4">
+                  <p className="text-sm font-semibold text-muted-foreground">Medidas del cartel</p>
+                  <div><p className="mb-2 text-sm">Ancho (máx. 5 m)</p><Chips options={ANCHOS.map((a) => `${a} m`)} value={`${ancho} m`} onChange={(v) => setMedida(v.replace(" m", ""), alto)} /></div>
+                  <div><p className="mb-2 text-sm">Alto (máx. 1 m)</p><Chips options={ALTOS.map((a) => `${a} m`)} value={`${alto} m`} onChange={(v) => setMedida(ancho, v.replace(" m", ""))} /></div>
                 </div>
-                <div><p className="mb-3 text-sm font-semibold text-muted-foreground">Iluminación</p><Chips options={ILUMINACION} value={cfg.iluminacion} onChange={set("iluminacion")} /></div>
+                <div><p className="mb-3 text-sm font-semibold text-muted-foreground">Iluminación: retroiluminado</p><Chips options={ILUMINACION} value={cfg.iluminacion} onChange={set("iluminacion")} />
+                  <p className="mt-2 text-xs text-muted-foreground">¿Necesitás otro tipo de LED? <a href={waContact} target="_blank" rel="noreferrer" className="text-neon underline">Escribinos por privado</a>.</p></div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="grid gap-2"><span className="text-sm font-semibold text-muted-foreground">Colores</span>
                     <input value={cfg.colores} onChange={(e) => set("colores")(e.target.value)} placeholder="Ej: blanco cálido y dorado" className="rounded-xl border border-input bg-muted/60 px-4 py-3 outline-none transition focus:border-neon" />
