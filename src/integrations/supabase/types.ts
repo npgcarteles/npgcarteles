@@ -14,16 +14,210 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      order_events: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          order_id: string
+          status: Database["public"]["Enums"]["order_status"] | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          order_id: string
+          status?: Database["public"]["Enums"]["order_status"] | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          order_id?: string
+          status?: Database["public"]["Enums"]["order_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          config: Json
+          contacto: Json
+          created_at: string
+          deposit_ars: number | null
+          id: string
+          logo_path: string | null
+          numero: number
+          preview_path: string | null
+          quote_note: string | null
+          quote_version: number
+          status: Database["public"]["Enums"]["order_status"]
+          total_ars: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          config: Json
+          contacto: Json
+          created_at?: string
+          deposit_ars?: number | null
+          id?: string
+          logo_path?: string | null
+          numero?: number
+          preview_path?: string | null
+          quote_note?: string | null
+          quote_version?: number
+          status?: Database["public"]["Enums"]["order_status"]
+          total_ars?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          contacto?: Json
+          created_at?: string
+          deposit_ars?: number | null
+          id?: string
+          logo_path?: string | null
+          numero?: number
+          preview_path?: string | null
+          quote_note?: string | null
+          quote_version?: number
+          status?: Database["public"]["Enums"]["order_status"]
+          total_ars?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount_ars: number
+          created_at: string
+          id: string
+          kind: string
+          mp_payment_id: string | null
+          order_id: string
+          preference_id: string | null
+          quote_version: number
+          status: string
+          status_detail: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_ars: number
+          created_at?: string
+          id?: string
+          kind: string
+          mp_payment_id?: string | null
+          order_id: string
+          preference_id?: string | null
+          quote_version: number
+          status?: string
+          status_detail?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_ars?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          mp_payment_id?: string | null
+          order_id?: string
+          preference_id?: string | null
+          quote_version?: number
+          status?: string
+          status_detail?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pricing_settings: {
+        Row: {
+          auto_enabled: boolean
+          deposit_percent: number | null
+          id: number
+          installation_ars: number | null
+          price_per_m2_ars: number | null
+          updated_at: string
+        }
+        Insert: {
+          auto_enabled?: boolean
+          deposit_percent?: number | null
+          id?: number
+          installation_ars?: number | null
+          price_per_m2_ars?: number | null
+          updated_at?: string
+        }
+        Update: {
+          auto_enabled?: boolean
+          deposit_percent?: number | null
+          id?: number
+          installation_ars?: number | null
+          price_per_m2_ars?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      order_status:
+        | "borrador"
+        | "esperando_presupuesto"
+        | "presupuesto_confirmado"
+        | "pendiente_pago"
+        | "pago_en_proceso"
+        | "pago_aprobado"
+        | "pago_rechazado"
+        | "pago_cancelado"
+        | "en_fabricacion"
+        | "finalizado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +344,20 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      order_status: [
+        "borrador",
+        "esperando_presupuesto",
+        "presupuesto_confirmado",
+        "pendiente_pago",
+        "pago_en_proceso",
+        "pago_aprobado",
+        "pago_rechazado",
+        "pago_cancelado",
+        "en_fabricacion",
+        "finalizado",
+      ],
+    },
   },
 } as const
