@@ -392,7 +392,7 @@ function Index() {
             </div>
             <p className="mt-4 text-sm text-muted-foreground">WhatsApp: 297 516-9780</p>
             <div className="mt-8 rounded-2xl border border-border bg-secondary/50 p-5 text-left">
-              <p className="font-display text-sm">Carteles personalizados</p>
+              <p className="font-display text-sm">Trabajos personalizados</p>
               <p className="mt-1 text-sm text-muted-foreground">Estas opciones se cotizan a medida. Consultanos por privado:</p>
               <ul className="mt-3 grid gap-2 sm:grid-cols-2">
                 {PERSONALIZADOS.map((t) => (

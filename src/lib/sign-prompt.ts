@@ -10,10 +10,9 @@ export const TIPOS = [
   { id: "Corpóreo LED", desc: "Letras 3D iluminadas con LED" },
 ];
 export const PERSONALIZADOS = [
-  { id: "Vinilos", desc: "Vinilo adhesivo sobre vidriera o pared" },
+  { id: "Carteles Backlight LED", desc: "Caja de luz retroiluminada con LED" },
+  { id: "Carteles Front", desc: "Cartel frontal para fachadas de locales" },
   { id: "Ploteo de vidrieras", desc: "Gráfica en vinilo para vidrieras de locales" },
-  { id: "Ploteo de ventanales", desc: "Vinilo decorativo, esmerilado o publicitario para ventanales" },
-  { id: "Rotulaciones", desc: "Rotulación de vehículos, paredes y superficies" },
 ];
 export const TAMANOS = ["Chico (1 m)", "Mediano (2 m)", "Grande (3 m)", "Extra grande (4 m+)"];
 export const ILUMINACION = ["Retroiluminado blanco cálido"];
