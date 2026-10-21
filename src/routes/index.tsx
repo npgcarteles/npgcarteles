@@ -3,11 +3,15 @@ import { saveDraft } from "@/lib/draft-store";
 import { AccountLinks } from "@/components/site-header";
 import { useEffect, useState } from "react";
 const MAX_PRUEBAS = 2;
-const ANCHOS = ["2", "2.5", "3", "3.5", "4", "4.5", "5"];
-const ALTOS = ["0.3", "0.4", "0.5", "0.6", "0.8", "1"];
+const ANCHOS = ["2", "3", "4", "5"];
+const ALTO_POR_ANCHO: Record<string, string> = { "2": "0.5", "3": "0.6", "4": "0.8", "5": "1" };
 import { Award, Box, Brush, Check, Download, HeartHandshake, ImagePlus, Lightbulb, Loader2, Menu, MessageCircle, Palette, PenTool, Printer, Rocket, Sparkles, Store, Users, X, Layers, Wand2 } from "lucide-react";
 import spaceBg from "@/assets/space-bg.jpg";
 import alien from "@/assets/alien.png";
+import trBocados from "@/assets/trabajo-bocados.png.asset.json";
+import trAroma from "@/assets/trabajo-panaderia-aroma.png.asset.json";
+import trChipa from "@/assets/trabajo-senor-chipa.png.asset.json";
+import trQueso from "@/assets/trabajo-punto-queso.png.asset.json";
 import npgLogo from "@/assets/npg-logo.png.asset.json";
 import { streamImage } from "@/lib/stream-image";
 import { buildPrompt, ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
@@ -17,9 +21,9 @@ const WHATSAPP = "5492975169780";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "NPG — Armá tu cartel corpóreo LED con IA" },
+      { title: "NPG — Hacemos que tu negocio impacte" },
       { name: "description", content: "Diseñá y visualizá tu próximo cartel con NPG: subí tu fachada y tu logo y mirá la simulación con IA." },
-      { property: "og:title", content: "NPG — Armá tu cartel corpóreo LED" },
+      { property: "og:title", content: "NPG — Hacemos que tu negocio impacte" },
       { property: "og:description", content: "Corpóreo LED, vinilos, ploteos de vidrieras y ventanales y rotulaciones simulados en tu fachada." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -27,6 +31,11 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
+
+const TRABAJOS = [
+  { titulo: "Corpóreo LED de polyfan", items: [{ nombre: "Bocado's", img: trBocados.url }, { nombre: "Panadería Aroma", img: trAroma.url }] },
+  { titulo: "Corpóreo LED de acrílico", items: [{ nombre: "Señor Chipá", img: trChipa.url }, { nombre: "Punto Queso", img: trQueso.url }] },
+];
 
 const NAV = [
   { id: "inicio", label: "Inicio" },
@@ -193,13 +202,13 @@ function SectionTitle({ kicker, title, sub }: { kicker?: string; title: React.Re
 function Index() {
   const [foto, setFoto] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
-  const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "3 m de ancho x 0.8 m de alto", colores: "", iluminacion: ILUMINACION[0] ?? "", notas: "" });
+  const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "3 m de ancho x 0.6 m de alto", colores: "", iluminacion: ILUMINACION[0] ?? "", notas: "" });
   const [result, setResult] = useState<string | null>(null);
   const [final, setFinal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ancho, setAncho] = useState("3");
-  const [alto, setAlto] = useState("0.8");
+  const [alto, setAlto] = useState("0.6");
   const [usadas, setUsadas] = useState(0);
   useEffect(() => { setUsadas(Number(localStorage.getItem("npg-pruebas") || 0)); }, []);
   const restantes = Math.max(0, MAX_PRUEBAS - usadas);
@@ -259,7 +268,7 @@ function Index() {
           <div className="animate-rise text-center md:text-left">
             <img src={npgLogo.url} alt="NPG Diseño & Cartelería" width={672} height={679} className="mx-auto mb-6 h-24 w-auto drop-shadow-[0_0_24px_rgba(118,43,255,0.6)] md:mx-0 md:h-32" />
             <h1 className="text-[2.6rem] leading-[1.02] sm:text-6xl lg:text-7xl">
-              Armá tu cartel<br /><span className="text-gradient">corpóreo LED</span>
+              Hacemos que tu negocio <span className="text-gradient">impacte</span>
             </h1>
             <p className="mx-auto mt-5 max-w-md text-lg text-muted-foreground md:mx-0">Diseñá y visualizá tu próximo cartel con NPG.</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
@@ -321,10 +330,10 @@ function Index() {
                 </div>
                 <div className="grid gap-4">
                   <p className="text-sm font-semibold text-muted-foreground">Medidas del cartel</p>
-                  <div><p className="mb-2 text-sm">Ancho (máx. 5 m)</p><Chips options={ANCHOS.map((a) => `${a} m`)} value={`${ancho} m`} onChange={(v) => setMedida(v.replace(" m", ""), alto)} /></div>
-                  <div><p className="mb-2 text-sm">Alto (máx. 1 m)</p><Chips options={ALTOS.map((a) => `${a} m`)} value={`${alto} m`} onChange={(v) => setMedida(ancho, v.replace(" m", ""))} /></div>
+                  <div><p className="mb-2 text-sm">Ancho</p><Chips options={ANCHOS.map((a) => `${a} m`)} value={`${ancho} m`} onChange={(v) => { const a = v.replace(" m", ""); setMedida(a, ALTO_POR_ANCHO[a] ?? "0.6"); }} /></div>
+                  <p className="text-sm text-muted-foreground">Alto automático según el ancho: <span className="font-semibold text-foreground">{alto} m</span></p>
                 </div>
-                <div><p className="mb-3 text-sm font-semibold text-muted-foreground">Iluminación: retroiluminado</p><Chips options={ILUMINACION} value={cfg.iluminacion} onChange={set("iluminacion")} />
+                <div><p className="mb-3 text-sm font-semibold text-muted-foreground">Iluminación</p><Chips options={ILUMINACION} value={cfg.iluminacion} onChange={set("iluminacion")} />
                   <p className="mt-2 text-xs text-muted-foreground">¿Necesitás otro tipo de LED? <a href={waContact} target="_blank" rel="noreferrer" className="text-neon underline">Escribinos por privado</a>.</p></div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="grid gap-2"><span className="text-sm font-semibold text-muted-foreground">Colores</span>
@@ -353,22 +362,17 @@ function Index() {
               )}
             </Step>
 
-            <Step n={4} title="Descargá y enviá" done={false}>
-              <button onClick={continuarPedido} disabled={!ready || saving}
-                className="mb-3 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-brand py-4 font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40">
-                {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />} CONTINUAR CON EL PEDIDO
-              </button>
+            <Step n={4} title="Descargá y comprá" done={false}>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <a href={ready ? result! : undefined} download="npg-studio-simulacion.png" aria-disabled={!ready}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-full border border-neon py-3.5 font-semibold text-neon transition hover:bg-accent ${ready ? "" : "pointer-events-none opacity-40"}`}>
                   <Download className="h-4 w-4" /> Descargar PNG
                 </a>
-                <a href={waLink} target="_blank" rel="noreferrer"
-                  className="flex flex-1 items-center justify-center gap-2 rounded-full bg-whatsapp py-3.5 font-semibold text-whatsapp-foreground transition hover:opacity-90">
-                  <MessageCircle className="h-4 w-4" /> Enviar por WhatsApp
-                </a>
+                <button onClick={continuarPedido} disabled={!ready || saving}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-brand py-3.5 font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40">
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} COMPRAR
+                </button>
               </div>
-              <p className="mt-3 text-sm text-muted-foreground">WhatsApp: 297 516-9780 · Adjuntá la imagen descargada al chat.</p>
             </Step>
           </div>
         </div>
@@ -377,10 +381,26 @@ function Index() {
       {/* TRABAJOS */}
       <section id="trabajos" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20">
         <SectionTitle kicker="PORTFOLIO" title="Nuestros trabajos" sub="Ideas que dejan huella." />
-        <div className="rounded-3xl border border-dashed border-border bg-card p-10 text-center">
-          <Sparkles className="mx-auto h-10 w-10 text-primary-glow" strokeWidth={1.5} />
-          <p className="mt-4 font-display text-lg">Muy pronto</p>
-          <p className="mx-auto mt-2 max-w-md text-muted-foreground">Estamos preparando la galería con nuestros proyectos reales.</p>
+        <div className="grid gap-12">
+          {TRABAJOS.map((g) => (
+            <div key={g.titulo}>
+              <div className="mb-5 flex items-center gap-4">
+                <h3 className="font-display text-lg md:text-xl"><span className="text-gradient">{g.titulo}</span></h3>
+                <span className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2">
+                {g.items.map((t) => (
+                  <figure key={t.nombre} className="group relative overflow-hidden rounded-3xl border border-border bg-card transition duration-500 hover:-translate-y-1 hover:border-neon hover:shadow-glow">
+                    <img src={t.img} alt={`Cartel ${g.titulo} de ${t.nombre}`} loading="lazy" width={1200} height={1600} className="aspect-[4/5] w-full object-cover transition duration-700 group-hover:scale-105" />
+                    <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/70 to-transparent p-5 pt-16">
+                      <p className="font-display text-base">{t.nombre}</p>
+                      <p className="text-xs tracking-widest text-neon">{g.titulo.toUpperCase()}</p>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 

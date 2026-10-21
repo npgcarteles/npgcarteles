@@ -7,8 +7,8 @@ import { CheckoutSteps, SiteHeader } from "@/components/site-header";
 import { getOrder, startPayment, syncPayment, updateOrderDesign } from "@/lib/orders.functions";
 import { formatARS, STATUS_LABEL, STATUS_MESSAGE, type OrderConfig, type PaymentKind } from "@/lib/orders.shared";
 
-const ANCHOS = [2, 2.5, 3, 3.5, 4, 4.5, 5];
-const ALTOS = [0.3, 0.4, 0.5, 0.6, 0.8, 1];
+const ANCHOS = [2, 3, 4, 5];
+const ALTO: Record<number, number> = { 2: 0.5, 3: 0.6, 4: 0.8, 5: 1 };
 
 const orderQuery = (id: string) => queryOptions({ queryKey: ["order", id], queryFn: () => getOrder({ data: { id } }) });
 
@@ -174,8 +174,7 @@ function EditDesign({ id, cfg, onDone }: { id: string; cfg: OrderConfig; onDone:
   const chip = (on: boolean) => `rounded-full border px-3 py-1.5 text-sm ${on ? "border-neon bg-accent" : "border-border"}`;
   return (
     <div className="mt-5 grid gap-4 rounded-2xl border border-border p-4">
-      <div className="flex flex-wrap gap-2">{ANCHOS.map((a) => <button key={a} type="button" onClick={() => setV({ ...v, ancho: a })} className={chip(v.ancho === a)}>{a} m ancho</button>)}</div>
-      <div className="flex flex-wrap gap-2">{ALTOS.map((a) => <button key={a} type="button" onClick={() => setV({ ...v, alto: a })} className={chip(v.alto === a)}>{a} m alto</button>)}</div>
+      <div className="flex flex-wrap gap-2">{ANCHOS.map((a) => <button key={a} type="button" onClick={() => setV({ ...v, ancho: a, alto: ALTO[a] ?? 0.6 })} className={chip(v.ancho === a)}>{a} m × {ALTO[a]} m</button>)}</div>
       <input value={v.colores} maxLength={200} onChange={(e) => setV({ ...v, colores: e.target.value })} placeholder="Colores" className="rounded-xl border border-input bg-muted/60 px-4 py-3" />
       <input value={v.notas} maxLength={500} onChange={(e) => setV({ ...v, notas: e.target.value })} placeholder="Observaciones" className="rounded-xl border border-input bg-muted/60 px-4 py-3" />
       <div className="flex gap-3">
