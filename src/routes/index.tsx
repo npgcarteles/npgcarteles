@@ -335,14 +335,6 @@ function Index() {
                 </div>
                 <div><p className="mb-3 text-sm font-semibold text-muted-foreground">Iluminación</p><Chips options={ILUMINACION} value={cfg.iluminacion} onChange={set("iluminacion")} />
                   <p className="mt-2 text-xs text-muted-foreground">¿Necesitás otro tipo de LED? <a href={waContact} target="_blank" rel="noreferrer" className="text-neon underline">Escribinos por privado</a>.</p></div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="grid gap-2"><span className="text-sm font-semibold text-muted-foreground">Colores</span>
-                    <input value={cfg.colores} onChange={(e) => set("colores")(e.target.value)} placeholder="Ej: blanco cálido y dorado" className="rounded-xl border border-input bg-muted/60 px-4 py-3 outline-none transition focus:border-neon" />
-                  </label>
-                  <label className="grid gap-2"><span className="text-sm font-semibold text-muted-foreground">Posición / notas (opcional)</span>
-                    <input value={cfg.notas} onChange={(e) => set("notas")(e.target.value)} placeholder="Ej: sobre la marquesina" className="rounded-xl border border-input bg-muted/60 px-4 py-3 outline-none transition focus:border-neon" />
-                  </label>
-                </div>
               </div>
             </Step>
 
