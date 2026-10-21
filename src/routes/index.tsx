@@ -13,8 +13,11 @@ import trAroma from "@/assets/trabajo-panaderia-aroma.png.asset.json";
 import trChipa from "@/assets/trabajo-senor-chipa.png.asset.json";
 import trQueso from "@/assets/trabajo-punto-queso.png.asset.json";
 import npgLogo from "@/assets/npg-logo.png.asset.json";
-import { streamImage } from "@/lib/stream-image";
-import { buildPrompt, ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
+import { composeMontage } from "@/lib/montage-compositor";
+import { MontageCalibration } from "@/components/montage-calibration";
+import type { Surface } from "@/lib/montage-geometry";
+import { Button } from "@/components/ui/button";
+import { ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
 
 const WHATSAPP = "5492975169780";
 
@@ -203,6 +206,7 @@ function Index() {
   const [foto, setFoto] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
   const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "3 m de ancho x 0.6 m de alto", colores: "", iluminacion: ILUMINACION[0] ?? "", notas: "" });
+  const [surface, setSurface] = useState<Surface>({corners:[],widthM:6,heightM:2,measured:false,center:{x:0.5,y:0.5}});
   const [result, setResult] = useState<string | null>(null);
   const [final, setFinal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -212,6 +216,8 @@ function Index() {
   const [usadas, setUsadas] = useState(0);
   useEffect(() => { setUsadas(Number(localStorage.getItem("npg-pruebas") || 0)); }, []);
   const restantes = Math.max(0, MAX_PRUEBAS - usadas);
+  useEffect(() => { setResult(null); setFinal(false); setError(null); }, [foto, logo, cfg, surface]);
+  useEffect(() => { setSurface({corners:[],widthM:6,heightM:2,measured:false,center:{x:0.5,y:0.5}}); }, [foto]);
   const setMedida = (a: string, h: string) => { setAncho(a); setAlto(h); setCfg((c) => ({ ...c, tamano: `${a} m de ancho x ${h} m de alto` })); };
   const set = (k: keyof SignConfig) => (v: string) => setCfg((c) => ({ ...c, [k]: v }));
 
@@ -219,14 +225,9 @@ function Index() {
     if (restantes <= 0) return setError("Ya usaste tus 2 pruebas con IA. Escribinos por WhatsApp para seguir con tu proyecto.");
     if (!foto || !logo) return setError("Subí la foto del local y el logo.");
     setError(null); setLoading(true); setResult(null); setFinal(false);
-    const form = new FormData();
-    form.append("prompt", buildPrompt(cfg));
-    form.append("image[]", foto);
-    form.append("image[]", logo);
-    form.append("size", "1536x1024");
-    form.append("quality", "high");
     try {
-      await streamImage("/api/edit-image", form, (src, isFinal) => { setResult(src); setFinal(isFinal); });
+      const r = await composeMontage(foto, logo, surface, Number(ancho), Number(alto), cfg.iluminacion === "Luz cálida");
+      setResult(URL.createObjectURL(r.blob)); setFinal(true);
       const n = usadas + 1;
       localStorage.setItem("npg-pruebas", String(n)); setUsadas(n);
     } catch (e) {
@@ -249,7 +250,7 @@ function Index() {
     setSaving(true);
     try {
       const preview = await (await fetch(result)).blob();
-      await saveDraft({ preview, logo, savedAt: Date.now(), config: { tipo: cfg.tipo, ancho: Number(ancho), alto: Number(alto), colores: cfg.colores, iluminacion: cfg.iluminacion, notas: cfg.notas } });
+      await saveDraft({ preview, logo, savedAt: Date.now(), config: { montaje: {...surface,method:"planar_homography"}, tipo: cfg.tipo, ancho: Number(ancho), alto: Number(alto), colores: cfg.colores, iluminacion: cfg.iluminacion, notas: cfg.notas } });
       navigate({ to: "/pedido/nuevo" });
     } catch { setError("No se pudo preparar el pedido. Probá de nuevo."); setSaving(false); }
   }
@@ -312,6 +313,7 @@ function Index() {
                 <Upload label="Foto del local" file={foto} onFile={setFoto} />
                 <Upload label="Tu logo" file={logo} onFile={setLogo} />
               </div>
+              {foto && <MontageCalibration photo={foto} value={surface} onChange={setSurface} widthM={Number(ancho)} heightM={Number(alto)} disabled={loading} />}
             </Step>
 
             <Step n={2} title="Configurá el cartel" done={false}>
@@ -339,15 +341,16 @@ function Index() {
             </Step>
 
             <Step n={3} title="Generá la simulación" done={ready}>
-              <button onClick={generar} disabled={loading}
+              <Button onClick={generar} disabled={loading || surface.corners.length !== 4}
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-brand py-4 font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60">
-                {loading ? <><Loader2 className="h-5 w-5 animate-spin" /> Generando simulación…</> : <><Wand2 className="h-5 w-5" /> Generar con IA ({restantes} de {MAX_PRUEBAS} pruebas)</>}
-              </button>
+                {loading ? <><Loader2 className="h-5 w-5 animate-spin" /> Generando simulación…</> : <><Wand2 className="h-5 w-5" /> Generar montaje ({restantes} de {MAX_PRUEBAS} pruebas)</>}
+              </Button>
               {error && <p role="alert" className="mt-4 rounded-xl border border-destructive/50 bg-destructive/10 px-4 py-3 text-destructive">{error}</p>}
               {ready && <p className="mt-4 flex items-center gap-2 text-success"><Sparkles className="h-4 w-4" /> ¡Simulación lista!</p>}
               {result ? (
                 <img src={result} alt="Simulación del cartel" className={`mt-6 w-full rounded-2xl border border-border transition-[filter] duration-700 ${final ? "blur-0" : "blur-2xl"}`} />
               ) : null}
+              {result && <p className="mt-3 text-sm font-semibold">{ancho} m × {alto} m · {surface.measured ? "Escala calibrada con referencia declarada por el cliente" : "Vista ilustrativa: escala real no verificada"}</p>}
               {result && (
                 <p role="note" className="mt-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-xs leading-5 text-muted-foreground">
                   <strong className="text-foreground">Aviso importante:</strong> Este contenido visual corresponde a una simulación gráfica optimizada. Ha sido generado exclusivamente como una muestra de referencia estética, por lo que no constituye una oferta contractual ni una réplica exacta del entregable final.
@@ -355,14 +358,14 @@ function Index() {
               )}
               {result ? null : (
                 <div className="mt-6 flex aspect-video items-center justify-center rounded-2xl border border-dashed border-border bg-muted/40 text-center text-muted-foreground">
-                  {loading ? "La IA está trabajando en tu cartel…" : "Acá vas a ver tu cartel en la fachada"}
+                  {loading ? "Preparando tu montaje…" : "Acá vas a ver tu cartel en la fachada"}
                 </div>
               )}
             </Step>
 
             <Step n={4} title="Descargá y comprá" done={false}>
               <div className="flex flex-col gap-3 sm:flex-row">
-                <a href={ready ? result! : undefined} download="npg-studio-simulacion.png" aria-disabled={!ready}
+                <a href={ready && result ? result : undefined} download="npg-studio-simulacion.png" aria-disabled={!ready}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-full border border-neon py-3.5 font-semibold text-neon transition hover:bg-accent ${ready ? "" : "pointer-events-none opacity-40"}`}>
                   <Download className="h-4 w-4" /> Descargar PNG
                 </a>
