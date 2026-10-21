@@ -189,7 +189,7 @@ function SectionTitle({ kicker, title, sub }: { kicker?: string; title: React.Re
 function Index() {
   const [foto, setFoto] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
-  const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "3 m de ancho x 0.8 m de alto", colores: "", iluminacion: ILUMINACION[0], notas: "" });
+  const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "3 m de ancho x 0.8 m de alto", colores: "", iluminacion: ILUMINACION[0] ?? "", notas: "" });
   const [result, setResult] = useState<string | null>(null);
   const [final, setFinal] = useState(false);
   const [loading, setLoading] = useState(false);
