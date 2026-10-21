@@ -14,6 +14,12 @@ const configSchema = z.object({
   colores: z.string().trim().max(200),
   iluminacion: z.string().trim().min(1).max(80),
   notas: z.string().trim().max(500),
+  montaje: z.object({
+    corners: z.array(z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) })).length(4),
+    widthM: z.number().positive().max(100), heightM: z.number().positive().max(100), measured: z.boolean(),
+    center: z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) }),
+    method: z.literal("planar_homography"),
+  }).optional(),
 });
 const contactoSchema = z.object({
   nombre: z.string().trim().min(2).max(100),
