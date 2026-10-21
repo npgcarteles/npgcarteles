@@ -16,13 +16,21 @@ export const TIPOS = [
 export const TAMANOS = ["Chico (1 m)", "Mediano (2 m)", "Grande (3 m)", "Extra grande (4 m+)"];
 export const ILUMINACION = ["Día, sin luz", "Luz frontal", "Retroiluminado (halo)", "Escena nocturna encendido"];
 
+const ESTILO: Record<string, string> = {
+  "Corpóreo LED": "dimensional 3D channel letters with built-in LED lighting",
+  "Black Night": "black acrylic panel that looks black by day and glows through the logo at night",
+  "Cartelería en Polyfan": "lightweight flat polyfan (aluminum composite) panel sign",
+  "Vinilos": "adhesive vinyl applied directly on the glass or wall",
+  "Impresión LED": "backlit lightbox with the logo printed on its face",
+};
+
 export function buildPrompt(c: SignConfig) {
   return [
     "Image 1 is a photo of a real storefront. Image 2 is the business logo.",
-    `Photorealistically install a new exterior sign on the storefront facade: type "${c.tipo}", approximate width ${c.tamano}.`,
+    `Photorealistically install a new exterior sign on the storefront facade. Construction style: ${ESTILO[c.tipo] ?? c.tipo}. Approximate width: ${c.tamano}.`,
     `Reproduce the logo from image 2 faithfully (same shapes, text and proportions) as the sign content. Colors: ${c.colores || "the logo's original colors"}.`,
     `Lighting: ${c.iluminacion}. Match perspective, scale, shadows, reflections and materials realistically.`,
     c.notas ? `Extra notes: ${c.notas}.` : "",
-    "Keep the rest of the photo (building, street, people, sky) unchanged. No watermarks or extra text.",
+    "The sign must show ONLY the logo from image 2 and nothing else: do NOT write the sign type, product name, size, dividers or any added words or slogans on the sign. Keep the rest of the photo (building, street, people, sky) unchanged. No watermarks or extra text anywhere.",
   ].join(" ");
 }
