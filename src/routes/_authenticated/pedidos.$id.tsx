@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { CheckoutHeader, CheckoutWhatsApp, OrderCheckout } from "@/components/order-checkout";
 import { Button } from "@/components/ui/button";
+import { OrderSharing } from "@/components/order-sharing";
 import { getOrder, startPayment, syncPayment, updateOrderDesign } from "@/lib/orders.functions";
 import { formatARS, STATUS_LABEL, STATUS_MESSAGE, type OrderConfig, type PaymentKind } from "@/lib/orders.shared";
 
@@ -91,6 +92,7 @@ function PedidoDetalle() {
             <span className="text-xs text-muted-foreground">{STATUS_LABEL[order.status]}</span>
           </div>
           {!confirmed && <p className="mt-3 text-sm leading-6 text-muted-foreground">{STATUS_MESSAGE[order.status]}</p>}
+          {data.isOwner && <OrderSharing key={`${order.id}-${order.updated_at}`} order={{ numeroFmt: order.numeroFmt, config: cfg, contacto: c, status: order.status, total_ars: order.total_ars }} />}
           {data.previewUrl && <img src={data.previewUrl} alt="Simulación del cartel" className="mt-6 w-full" />}
           {data.previewUrl && <p className="mt-3 text-xs text-muted-foreground">{cfg.montaje?.measured ? "Escala calibrada con medidas declaradas por el cliente; no es una medición profesional." : "Vista ilustrativa: escala real no verificada"}</p>}
           {!data.previewUrl && <p className="mt-4 text-sm text-muted-foreground">No hay un montaje vigente para estas medidas. Prepará una nueva simulación en el configurador.</p>}
