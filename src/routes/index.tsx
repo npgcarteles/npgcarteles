@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { saveDraft } from "@/lib/draft-store";
 import { AccountLinks } from "@/components/site-header";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 const MAX_PRUEBAS = 2;
 const ANCHOS = ["2", "3", "4", "5"];
 const ALTO_POR_ANCHO: Record<string, string> = { "2": "0.5", "3": "0.6", "4": "0.8", "5": "1" };
@@ -203,6 +203,7 @@ function SectionTitle({ kicker, title, sub }: { kicker?: string; title: React.Re
 }
 
 function Index() {
+  const revision = useRef(0);
   const [foto, setFoto] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
   const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "3 m de ancho x 0.6 m de alto", colores: "", iluminacion: ILUMINACION[0] ?? "", notas: "" });
@@ -216,7 +217,7 @@ function Index() {
   const [usadas, setUsadas] = useState(0);
   useEffect(() => { setUsadas(Number(localStorage.getItem("npg-pruebas") || 0)); }, []);
   const restantes = Math.max(0, MAX_PRUEBAS - usadas);
-  useEffect(() => { setResult(null); setFinal(false); setError(null); }, [foto, logo, cfg, surface]);
+  useEffect(() => { revision.current += 1; setResult(null); setFinal(false); setError(null); }, [foto, logo, cfg, surface]);
   useEffect(() => { setSurface({corners:[],widthM:6,heightM:2,measured:false,center:{x:0.5,y:0.5}}); }, [foto]);
   const setMedida = (a: string, h: string) => { setAncho(a); setAlto(h); setCfg((c) => ({ ...c, tamano: `${a} m de ancho x ${h} m de alto` })); };
   const set = (k: keyof SignConfig) => (v: string) => setCfg((c) => ({ ...c, [k]: v }));
@@ -225,8 +226,10 @@ function Index() {
     if (restantes <= 0) return setError("Ya usaste tus 2 pruebas con IA. Escribinos por WhatsApp para seguir con tu proyecto.");
     if (!foto || !logo) return setError("Subí la foto del local y el logo.");
     setError(null); setLoading(true); setResult(null); setFinal(false);
+    const startedRevision = revision.current;
     try {
       const r = await composeMontage(foto, logo, surface, Number(ancho), Number(alto), cfg.iluminacion === "Luz cálida");
+      if (revision.current !== startedRevision) throw new Error("La configuración cambió. Generá un montaje nuevo.");
       setResult(URL.createObjectURL(r.blob)); setFinal(true);
       const n = usadas + 1;
       localStorage.setItem("npg-pruebas", String(n)); setUsadas(n);
@@ -242,6 +245,7 @@ function Index() {
   );
   const waLink = `https://wa.me/${WHATSAPP}?text=${waText}`;
   const waContact = `https://wa.me/${WHATSAPP}`;
+  useEffect(() => () => { if (result?.startsWith("blob:")) URL.revokeObjectURL(result); }, [result]);
   const ready = !!(result && final);
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
@@ -250,7 +254,7 @@ function Index() {
     setSaving(true);
     try {
       const preview = await (await fetch(result)).blob();
-      await saveDraft({ preview, logo, savedAt: Date.now(), config: { montaje: {...surface,method:"planar_homography"}, tipo: cfg.tipo, ancho: Number(ancho), alto: Number(alto), colores: cfg.colores, iluminacion: cfg.iluminacion, notas: cfg.notas } });
+      await saveDraft({ preview, logo, ...(foto ? {originalPhoto: foto} : {}), savedAt: Date.now(), config: { montaje: {...surface,method:"planar_homography"}, tipo: cfg.tipo, ancho: Number(ancho), alto: Number(alto), colores: cfg.colores, iluminacion: cfg.iluminacion, notas: cfg.notas } });
       navigate({ to: "/pedido/nuevo" });
     } catch { setError("No se pudo preparar el pedido. Probá de nuevo."); setSaving(false); }
   }
