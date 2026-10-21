@@ -14,7 +14,6 @@ import trChipa from "@/assets/trabajo-senor-chipa.png.asset.json";
 import trQueso from "@/assets/trabajo-punto-queso.png.asset.json";
 import npgLogo from "@/assets/npg-logo.png.asset.json";
 import { composeMontage } from "@/lib/montage-compositor";
-import { MontageCalibration } from "@/components/montage-calibration";
 import type { Surface } from "@/lib/montage-geometry";
 import { Button } from "@/components/ui/button";
 import { ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
@@ -207,7 +206,7 @@ function Index() {
   const [foto, setFoto] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
   const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "3 m de ancho x 0.6 m de alto", colores: "", iluminacion: ILUMINACION[0] ?? "", notas: "" });
-  const [surface, setSurface] = useState<Surface>({corners:[],widthM:6,heightM:2,measured:false,center:{x:0.5,y:0.5}});
+  const [surface] = useState<Surface>({corners:[{x:0.1,y:0.2},{x:0.9,y:0.2},{x:0.9,y:0.8},{x:0.1,y:0.8}],widthM:6,heightM:2,measured:false,center:{x:0.5,y:0.5}});
   const [result, setResult] = useState<string | null>(null);
   const [final, setFinal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -218,7 +217,6 @@ function Index() {
   useEffect(() => { setUsadas(Number(localStorage.getItem("npg-pruebas") || 0)); }, []);
   const restantes = Math.max(0, MAX_PRUEBAS - usadas);
   useEffect(() => { revision.current += 1; setResult(null); setFinal(false); setError(null); }, [foto, logo, cfg, surface]);
-  useEffect(() => { setSurface({corners:[],widthM:6,heightM:2,measured:false,center:{x:0.5,y:0.5}}); }, [foto]);
   const setMedida = (a: string, h: string) => { setAncho(a); setAlto(h); setCfg((c) => ({ ...c, tamano: `${a} m de ancho x ${h} m de alto` })); };
   const set = (k: keyof SignConfig) => (v: string) => setCfg((c) => ({ ...c, [k]: v }));
 
@@ -317,7 +315,6 @@ function Index() {
                 <Upload label="Foto del local" file={foto} onFile={setFoto} />
                 <Upload label="Tu logo" file={logo} onFile={setLogo} />
               </div>
-              {foto && <MontageCalibration photo={foto} value={surface} onChange={setSurface} widthM={Number(ancho)} heightM={Number(alto)} disabled={loading} />}
             </Step>
 
             <Step n={2} title="Configurá el cartel" done={false}>
@@ -344,7 +341,7 @@ function Index() {
             </Step>
 
             <Step n={3} title="Generá la simulación" done={ready}>
-              <Button onClick={generar} disabled={loading || surface.corners.length !== 4}
+              <Button onClick={generar} disabled={loading || !foto || !logo}
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-brand py-4 font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60">
                 {loading ? <><Loader2 className="h-5 w-5 animate-spin" /> Generando simulación…</> : <><Wand2 className="h-5 w-5" /> Generar montaje ({restantes} de {MAX_PRUEBAS} pruebas)</>}
               </Button>
@@ -355,11 +352,9 @@ function Index() {
               ) : null}
               {result && <p className="mt-3 text-sm font-semibold">{ancho} m × {alto} m · {surface.measured ? "Escala calibrada con referencia declarada por el cliente" : "Vista ilustrativa: escala real no verificada"}</p>}
               {result && <p className="mt-2 text-xs text-muted-foreground">El logo conserva sus proporciones dentro de estas medidas; puede dejar espacio libre. El montaje no elimina carteles existentes ni reproduce materiales y volumen de fabricación.</p>}
-              {result && (
-                <p role="note" className="mt-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-xs leading-5 text-muted-foreground">
+              <p role="note" className="mt-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-xs leading-5 text-muted-foreground">
                   <strong className="text-foreground">Aviso importante:</strong> Este contenido visual corresponde a una simulación gráfica optimizada. Ha sido generado exclusivamente como una muestra de referencia estética, por lo que no constituye una oferta contractual ni una réplica exacta del entregable final.
-                </p>
-              )}
+              </p>
               {result ? null : (
                 <div className="mt-6 flex aspect-video items-center justify-center rounded-2xl border border-dashed border-border bg-muted/40 text-center text-muted-foreground">
                   {loading ? "Preparando tu montaje…" : "Acá vas a ver tu cartel en la fachada"}
