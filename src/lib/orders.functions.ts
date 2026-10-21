@@ -125,6 +125,7 @@ export const updateOrderDesign = createServerFn({ method: "POST" })
     const status: OrderStatus = quote ? "presupuesto_confirmado" : "esperando_presupuesto";
     await db.from("orders").update({
       config: data.config, status, total_ars: quote?.total ?? null, deposit_ars: quote?.deposit ?? null,
+      preview_path: null,
       quote_version: o.quote_version + 1, updated_at: now(),
     }).eq("id", o.id);
     await db.from("order_events").insert({ order_id: o.id, status, message: "El cliente modificó el diseño; el presupuesto anterior quedó sin efecto" });

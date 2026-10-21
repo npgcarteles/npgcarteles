@@ -33,7 +33,8 @@ export async function composeMontage(photo: Blob, logo: Blob, surface: Surface, 
   }
   warped.ctx.putImageData(out,0,0);
   // Effects do not scale or redraw the source logo; only a bounded halo/contact shadow.
-  ctx.save(); ctx.shadowColor=warm ? "rgba(255,210,140,0.65)" : "rgba(235,245,255,0.65)"; ctx.shadowBlur=Math.max(2,Math.min(12,(x1-x0)*0.02)); ctx.drawImage(warped.c,x0,y0); ctx.restore();
+  const tokens=getComputedStyle(document.documentElement);
+  ctx.save(); ctx.shadowColor=tokens.getPropertyValue(warm ? "--sign-halo-warm" : "--sign-halo-white").trim(); ctx.shadowBlur=Math.max(2,Math.min(12,(x1-x0)*0.02)); ctx.drawImage(warped.c,x0,y0); ctx.restore();
   ctx.drawImage(warped.c,x0,y0);
   const blob=await new Promise<Blob>((resolve,reject)=>c.toBlob((b)=>b?resolve(b):reject(new Error("No se pudo exportar el montaje.")),"image/png"));
   return {blob,corners,dimensions:d};

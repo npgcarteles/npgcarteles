@@ -92,6 +92,8 @@ function PedidoDetalle() {
           </div>
           {!confirmed && <p className="mt-3 text-sm leading-6 text-muted-foreground">{STATUS_MESSAGE[order.status]}</p>}
           {data.previewUrl && <img src={data.previewUrl} alt="Simulación del cartel" className="mt-6 w-full" />}
+          {data.previewUrl && <p className="mt-3 text-xs text-muted-foreground">{cfg.montaje?.measured ? "Escala calibrada con medidas declaradas por el cliente; no es una medición profesional." : "Vista ilustrativa: escala real no verificada"}</p>}
+          {!data.previewUrl && <p className="mt-4 text-sm text-muted-foreground">No hay un montaje vigente para estas medidas. Prepará una nueva simulación en el configurador.</p>}
           {data.logoUrl && <div className="mt-4 flex items-center gap-3"><img src={data.logoUrl} alt="Logo del cliente" className="h-14 w-14 bg-secondary object-contain p-1" /><span className="text-sm text-muted-foreground">Logo del cliente</span></div>}
           {editing ? <EditDesign id={id} cfg={cfg} onDone={() => setEditing(false)} /> : (
             <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">

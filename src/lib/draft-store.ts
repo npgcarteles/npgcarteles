@@ -1,7 +1,7 @@
 // Keeps the configured design (with images) in the browser while the user signs in.
 import type { OrderConfig } from "./orders.shared";
 
-export type Draft = { config: OrderConfig; preview: Blob; logo: Blob | null; savedAt: number };
+export type Draft = { config: OrderConfig; preview: Blob; logo: Blob | null; originalPhoto?: Blob; savedAt: number };
 
 function db(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
