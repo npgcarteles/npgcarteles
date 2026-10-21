@@ -61,35 +61,42 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-whatsapp: var(--whatsapp);
   --color-whatsapp-foreground: var(--whatsapp-foreground);
-  --font-display: "Bebas Neue", sans-serif;
-  --font-sans: "Barlow", sans-serif;
+  --font-display: "Unbounded", sans-serif;
+  --font-sans: "Manrope", sans-serif;
+  --color-neon: var(--neon);
+  --color-primary-glow: var(--primary-glow);
+  --color-success: var(--success);
   --shadow-glow: var(--glow);
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.14 0.01 60);
-  --foreground: oklch(0.96 0.01 80);
-  --card: oklch(0.19 0.012 60);
-  --card-foreground: oklch(0.96 0.01 80);
-  --popover: oklch(0.19 0.012 60);
-  --popover-foreground: oklch(0.96 0.01 80);
-  --primary: oklch(0.8 0.16 70);
-  --primary-foreground: oklch(0.15 0.02 60);
-  --secondary: oklch(0.25 0.015 60);
-  --secondary-foreground: oklch(0.96 0.01 80);
-  --muted: oklch(0.23 0.012 60);
-  --muted-foreground: oklch(0.7 0.02 70);
-  --accent: oklch(0.3 0.05 70);
-  --accent-foreground: oklch(0.96 0.01 80);
+  --radius: 1rem;
+  --background: oklch(0.12 0.02 280);
+  --foreground: oklch(0.97 0.01 280);
+  --card: oklch(0.16 0.04 275 / 0.7);
+  --card-foreground: oklch(0.97 0.01 280);
+  --popover: oklch(0.16 0.04 275);
+  --popover-foreground: oklch(0.97 0.01 280);
+  --primary: oklch(0.56 0.26 290);
+  --primary-foreground: oklch(0.98 0.01 280);
+  --primary-glow: oklch(0.66 0.27 320);
+  --neon: oklch(0.8 0.15 220);
+  --secondary: oklch(0.2 0.05 275);
+  --secondary-foreground: oklch(0.97 0.01 280);
+  --muted: oklch(0.18 0.04 275);
+  --muted-foreground: oklch(0.74 0.04 280);
+  --accent: oklch(0.26 0.1 290);
+  --accent-foreground: oklch(0.97 0.01 280);
   --destructive: oklch(0.65 0.22 27);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.3 0.015 60);
-  --input: oklch(0.3 0.015 60);
-  --ring: oklch(0.8 0.16 70);
+  --success: oklch(0.78 0.16 160);
+  --border: oklch(0.45 0.12 285 / 0.35);
+  --input: oklch(0.45 0.12 285 / 0.4);
+  --ring: oklch(0.8 0.15 220);
   --whatsapp: oklch(0.72 0.17 150);
   --whatsapp-foreground: oklch(0.15 0.02 150);
-  --glow: 0 0 40px oklch(0.8 0.16 70 / 0.35);
+  --glow: 0 0 32px oklch(0.56 0.26 290 / 0.45), 0 0 64px oklch(0.8 0.15 220 / 0.18);
+  --gradient-brand: linear-gradient(100deg, oklch(0.56 0.26 290), oklch(0.66 0.27 320) 45%, oklch(0.8 0.15 220));
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -153,5 +160,41 @@
 
 @layer base {
   body { font-family: var(--font-sans); }
-  h1, h2, h3 { font-family: var(--font-display); letter-spacing: 0.02em; }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.01em; text-transform: uppercase; font-weight: 700; }
 }
+
+@utility text-gradient {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility bg-gradient-brand { background: var(--gradient-brand); }
+@utility glass {
+  background: color-mix(in oklab, var(--background) 65%, transparent);
+  backdrop-filter: blur(14px);
+}
+@utility starfield {
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, var(--foreground), transparent),
+    radial-gradient(1px 1px at 70% 80%, var(--foreground), transparent),
+    radial-gradient(1.5px 1.5px at 40% 60%, var(--neon), transparent),
+    radial-gradient(1px 1px at 85% 20%, var(--foreground), transparent),
+    radial-gradient(1px 1px at 10% 85%, var(--primary-glow), transparent);
+  background-size: 400px 400px;
+  animation: drift 120s linear infinite;
+  opacity: .5;
+}
+@keyframes drift { to { background-position: 400px -400px; } }
+@keyframes float { 0%,100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-16px) rotate(1.5deg); } }
+@keyframes pulse-glow { 0%,100% { opacity: .55; transform: scale(1); } 50% { opacity: .85; transform: scale(1.06); } }
+@keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@utility animate-float { animation: float 6s ease-in-out infinite; }
+@utility animate-pulse-glow { animation: pulse-glow 6s ease-in-out infinite; }
+@utility animate-rise { animation: rise .8s ease-out both; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition-duration: 0ms !important; }
+}
+@media (max-width: 640px) { .starfield { animation: none; } }

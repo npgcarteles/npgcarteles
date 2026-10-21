@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import hero from "@/assets/hero.jpg";
+import { Award, Box, Brush, Check, Download, HeartHandshake, ImagePlus, Lightbulb, Loader2, Menu, MessageCircle, Palette, PenTool, Printer, Rocket, Sparkles, Store, Users, X, Layers, Wand2 } from "lucide-react";
+import spaceBg from "@/assets/space-bg.jpg";
+import alien from "@/assets/alien.png";
 import { streamImage } from "@/lib/stream-image";
 import { buildPrompt, ILUMINACION, TAMANOS, TIPOS, type SignConfig } from "@/lib/sign-prompt";
 
@@ -9,9 +11,9 @@ const WHATSAPP = "5492975169780";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "NPG Studio — Simulá tu cartel con IA" },
-      { name: "description", content: "Subí la foto de tu local y tu logo, elegí el cartel y mirá cómo quedaría con IA." },
-      { property: "og:title", content: "NPG Studio — Simulá tu cartel con IA" },
+      { title: "NPG — Armá tu cartel corpóreo LED con IA" },
+      { name: "description", content: "Diseñá y visualizá tu próximo cartel con NPG: subí tu fachada y tu logo y mirá la simulación con IA." },
+      { property: "og:title", content: "NPG — Armá tu cartel corpóreo LED" },
       { property: "og:description", content: "Corpóreo LED, Black Night, Polyfan, vinilos e impresión LED simulados en tu fachada." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -20,14 +22,93 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+const NAV = [
+  { id: "inicio", label: "Inicio" },
+  { id: "servicios", label: "Servicios" },
+  { id: "trabajos", label: "Nuestros trabajos" },
+  { id: "crear", label: "Armá tu cartel" },
+  { id: "contacto", label: "Contacto" },
+];
+
+const SERVICIOS = [
+  { icon: Store, label: "Cartelería comercial" },
+  { icon: Lightbulb, label: "Corpóreos LED" },
+  { icon: Printer, label: "Impresión en vinilo" },
+  { icon: Layers, label: "Backlight y Polyfan" },
+  { icon: Box, label: "Impresión 3D" },
+  { icon: PenTool, label: "Diseño de logos" },
+  { icon: Brush, label: "Rediseño de fachadas" },
+];
+
+const POR_QUE = [
+  { icon: Award, label: "Calidad y durabilidad" },
+  { icon: Palette, label: "Diseños personalizados" },
+  { icon: Users, label: "Asesoramiento profesional" },
+  { icon: HeartHandshake, label: "Atención cercana" },
+  { icon: Rocket, label: "Compromiso en cada proyecto" },
+];
+
+function Alien({ className = "" }: { className?: string }) {
+  const [hop, setHop] = useState(false);
+  return (
+    <div className={`relative ${className}`}>
+      <div className="absolute inset-[12%] animate-pulse-glow rounded-full bg-gradient-brand blur-3xl" aria-hidden />
+      <button
+        type="button"
+        aria-label="Alien de NPG"
+        onClick={() => { setHop(true); setTimeout(() => setHop(false), 500); }}
+        className="relative block w-full animate-float"
+      >
+        <img
+          src={alien}
+          alt="Alien mascota de NPG con gorra y buzo negros"
+          width={1024}
+          height={1024}
+          className={`w-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)] transition-transform duration-500 hover:-rotate-3 hover:scale-105 ${hop ? "-translate-y-6 scale-105" : ""}`}
+        />
+      </button>
+    </div>
+  );
+}
+
+function Nav() {
+  const [open, setOpen] = useState(false);
+  return (
+    <nav className="glass fixed inset-x-0 top-0 z-50 border-b border-border">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
+        <a href="#inicio" className="font-display text-xl tracking-wider"><span className="text-gradient">NPG</span></a>
+        <ul className="hidden gap-7 text-sm md:flex">
+          {NAV.map((n) => (
+            <li key={n.id}><a href={`#${n.id}`} className="text-muted-foreground transition hover:text-foreground">{n.label}</a></li>
+          ))}
+        </ul>
+        <button className="p-2 md:hidden" aria-label={open ? "Cerrar menú" : "Abrir menú"} onClick={() => setOpen(!open)}>
+          {open ? <X /> : <Menu />}
+        </button>
+      </div>
+      {open && (
+        <ul className="grid gap-1 border-t border-border px-5 py-3 md:hidden">
+          {NAV.map((n) => (
+            <li key={n.id}><a onClick={() => setOpen(false)} href={`#${n.id}`} className="block rounded-lg px-3 py-3 hover:bg-accent">{n.label}</a></li>
+          ))}
+        </ul>
+      )}
+    </nav>
+  );
+}
+
 function Upload({ label, file, onFile }: { label: string; file: File | null; onFile: (f: File) => void }) {
   return (
-    <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-border bg-muted transition hover:border-primary">
+    <label className="group relative flex aspect-[4/3] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-muted/60 transition hover:border-neon hover:shadow-glow">
       {file ? (
-        <img src={URL.createObjectURL(file)} alt={label} className="h-full w-full object-contain" />
+        <>
+          <img src={URL.createObjectURL(file)} alt={label} className="h-full w-full object-contain" />
+          <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-success px-3 py-1 text-xs font-semibold text-background"><Check className="h-3 w-3" /> Listo</span>
+        </>
       ) : (
-        <span className="px-4 text-center text-muted-foreground">
-          <span className="block font-display text-2xl text-foreground">{label}</span>
+        <span className="flex flex-col items-center gap-2 px-4 text-center text-muted-foreground">
+          <ImagePlus className="h-8 w-8 text-neon transition group-hover:scale-110" />
+          <span className="font-display text-sm text-foreground">{label}</span>
           Tocá para subir
         </span>
       )}
@@ -40,12 +121,8 @@ function Chips({ options, value, onChange }: { options: string[]; value: string;
   return (
     <div className="flex flex-wrap gap-2">
       {options.map((o) => (
-        <button
-          key={o}
-          type="button"
-          onClick={() => onChange(o)}
-          className={`rounded-full border px-4 py-2 text-sm transition ${value === o ? "border-primary bg-primary text-primary-foreground" : "border-border bg-secondary hover:border-primary"}`}
-        >
+        <button key={o} type="button" onClick={() => onChange(o)}
+          className={`rounded-full border px-4 py-2.5 text-sm transition ${value === o ? "border-transparent bg-gradient-brand text-primary-foreground shadow-glow" : "border-border bg-secondary/60 hover:border-neon"}`}>
           {o}
         </button>
       ))}
@@ -53,15 +130,27 @@ function Chips({ options, value, onChange }: { options: string[]; value: string;
   );
 }
 
-function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
+function Step({ n, title, done, children }: { n: number; title: string; done: boolean; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-border bg-card p-6 md:p-8">
-      <h2 className="mb-5 flex items-center gap-3 text-3xl">
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-display text-xl text-primary-foreground">{n}</span>
+    <section className="relative rounded-2xl border border-border bg-card p-5 backdrop-blur md:p-7">
+      <h3 className="mb-5 flex items-center gap-3 text-lg md:text-xl">
+        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition ${done ? "bg-success text-background" : "bg-gradient-brand text-primary-foreground"}`}>
+          {done ? <Check className="h-4 w-4" /> : n}
+        </span>
         {title}
-      </h2>
+      </h3>
       {children}
     </section>
+  );
+}
+
+function SectionTitle({ kicker, title, sub }: { kicker?: string; title: React.ReactNode; sub?: string }) {
+  return (
+    <div className="mb-10 text-center">
+      {kicker && <p className="mb-3 text-xs font-semibold tracking-[0.3em] text-neon">{kicker}</p>}
+      <h2 className="text-3xl md:text-5xl">{title}</h2>
+      {sub && <p className="mx-auto mt-3 max-w-xl text-muted-foreground">{sub}</p>}
+    </div>
   );
 }
 
@@ -94,79 +183,178 @@ function Index() {
   const waText = encodeURIComponent(
     `Hola NPG Studio! Quiero cotizar este proyecto:\n• Tipo: ${cfg.tipo}\n• Tamaño: ${cfg.tamano}\n• Colores: ${cfg.colores || "los del logo"}\n• Iluminación: ${cfg.iluminacion}${cfg.notas ? `\n• Notas: ${cfg.notas}` : ""}\n(Adjunto la simulación descargada)`,
   );
+  const waLink = `https://wa.me/${WHATSAPP}?text=${waText}`;
+  const waContact = `https://wa.me/${WHATSAPP}`;
+  const ready = !!(result && final);
+  const progress = [!!foto && !!logo, true, ready, ready].filter(Boolean).length;
 
   return (
-    <main className="min-h-screen">
-      <header className="relative flex min-h-[70vh] items-end overflow-hidden">
-        <img src={hero} alt="Fachada con cartel corpóreo LED de noche" width={1600} height={912} className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        <div className="relative mx-auto w-full max-w-5xl px-6 pb-16">
-          <p className="font-display text-2xl tracking-widest text-primary">NPG Studio</p>
-          <h1 className="mt-2 text-6xl leading-none md:text-8xl">Mirá tu cartel<br />antes de hacerlo</h1>
-          <p className="mt-4 max-w-xl text-lg text-muted-foreground">Subí, configurá, generá y descargá. Nuestra IA integra el cartel en la foto de tu local de forma realista.</p>
-          <a href="#crear" className="mt-8 inline-block rounded-full bg-primary px-8 py-3 font-semibold text-primary-foreground shadow-glow transition hover:opacity-90">Empezar</a>
+    <main className="min-h-screen overflow-x-hidden">
+      <Nav />
+
+      {/* HERO */}
+      <header id="inicio" className="relative flex min-h-[100svh] items-center overflow-hidden pt-16">
+        <img src={spaceBg} alt="" width={1920} height={1088} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="starfield absolute inset-0" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40" />
+        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-6 px-5 py-12 md:grid-cols-2">
+          <div className="animate-rise text-center md:text-left">
+            <p className="mb-4 text-xs font-semibold tracking-[0.3em] text-neon">NPG DISEÑO & CARTELERÍA</p>
+            <h1 className="text-[2.6rem] leading-[1.02] sm:text-6xl lg:text-7xl">
+              Armá tu cartel<br /><span className="text-gradient">corpóreo LED</span>
+            </h1>
+            <p className="mx-auto mt-5 max-w-md text-lg text-muted-foreground md:mx-0">Diseñá y visualizá tu próximo cartel con NPG.</p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
+              <a href="#crear" className="rounded-full bg-gradient-brand px-8 py-4 text-center font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.03]">Empezar a diseñar</a>
+              <a href="#servicios" className="rounded-full border border-border px-8 py-4 text-center text-sm font-semibold transition hover:border-neon">Conocé nuestros servicios</a>
+            </div>
+            <p className="mt-6 text-sm tracking-widest text-muted-foreground">Diseño · Fabricación · Instalación</p>
+          </div>
+          <Alien className="mx-auto w-[min(72vw,320px)] md:w-full md:max-w-[480px]" />
         </div>
       </header>
 
-      <div id="crear" className="mx-auto grid max-w-5xl gap-6 px-6 py-16">
-        <Step n={1} title="Subir">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Upload label="Foto del local" file={foto} onFile={setFoto} />
-            <Upload label="Tu logo" file={logo} onFile={setLogo} />
-          </div>
-        </Step>
+      {/* SERVICIOS */}
+      <section id="servicios" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20">
+        <SectionTitle kicker="SERVICIOS" title={<>Todo para que tu marca <span className="text-gradient">destaque</span></>} />
+        <div className="-mx-5 flex snap-x gap-4 overflow-x-auto px-5 pb-4 lg:mx-0 lg:grid lg:grid-cols-7 lg:overflow-visible lg:px-0">
+          {SERVICIOS.map(({ icon: I, label }) => (
+            <div key={label} className="group min-w-[150px] snap-start rounded-2xl border border-border bg-card p-5 text-center transition hover:-translate-y-1 hover:border-neon hover:shadow-glow">
+              <I className="mx-auto h-8 w-8 text-neon transition group-hover:text-primary-glow" strokeWidth={1.5} />
+              <p className="mt-3 text-sm font-semibold">{label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
-        <Step n={2} title="Configurar">
-          <div className="grid gap-6">
-            <div>
-              <p className="mb-3 font-semibold">Tipo de cartel</p>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {TIPOS.map((t) => (
-                  <button key={t.id} type="button" onClick={() => set("tipo")(t.id)}
-                    className={`rounded-xl border p-4 text-left transition ${cfg.tipo === t.id ? "border-primary bg-accent shadow-glow" : "border-border bg-secondary hover:border-primary"}`}>
-                    <span className="block font-display text-xl">{t.id}</span>
-                    <span className="text-sm text-muted-foreground">{t.desc}</span>
-                  </button>
-                ))}
+      {/* CONFIGURADOR */}
+      <section id="crear" className="relative scroll-mt-16 px-5 py-20">
+        <div className="absolute left-1/2 top-0 h-96 w-[60rem] max-w-full -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" aria-hidden />
+        <div className="relative mx-auto max-w-6xl rounded-3xl border border-border bg-gradient-to-b from-secondary/50 to-background p-4 shadow-glow md:p-10">
+          <div className="mb-8 flex flex-col items-center gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="text-center md:text-left">
+              <p className="mb-2 text-xs font-semibold tracking-[0.3em] text-neon">ESTUDIO NPG</p>
+              <h2 className="text-3xl md:text-5xl">Armá tu propio <span className="text-gradient">cartel</span></h2>
+              <p className="mt-2 text-muted-foreground">Diseñá, visualizá y personalizá tu idea.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="hidden w-48 sm:block">
+                <div className="mb-1 flex justify-between text-xs text-muted-foreground"><span>Progreso</span><span>{progress}/4</span></div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full bg-gradient-brand transition-all duration-500" style={{ width: `${progress * 25}%` }} /></div>
               </div>
-            </div>
-            <div><p className="mb-3 font-semibold">Tamaño</p><Chips options={TAMANOS} value={cfg.tamano} onChange={set("tamano")} /></div>
-            <div><p className="mb-3 font-semibold">Iluminación</p><Chips options={ILUMINACION} value={cfg.iluminacion} onChange={set("iluminacion")} /></div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="grid gap-2"><span className="font-semibold">Colores</span>
-                <input value={cfg.colores} onChange={(e) => set("colores")(e.target.value)} placeholder="Ej: blanco cálido y dorado" className="rounded-lg border border-input bg-muted px-4 py-3 outline-none focus:border-primary" />
-              </label>
-              <label className="grid gap-2"><span className="font-semibold">Notas (opcional)</span>
-                <input value={cfg.notas} onChange={(e) => set("notas")(e.target.value)} placeholder="Ej: sobre la marquesina" className="rounded-lg border border-input bg-muted px-4 py-3 outline-none focus:border-primary" />
-              </label>
+              <img src={alien} alt="" width={96} height={96} loading="lazy" className="h-20 w-20 animate-float md:h-24 md:w-24" />
             </div>
           </div>
-        </Step>
 
-        <Step n={3} title="Generar">
-          <button onClick={generar} disabled={loading} className="w-full rounded-full bg-primary py-4 font-display text-2xl text-primary-foreground shadow-glow transition hover:opacity-90 disabled:opacity-50">
-            {loading ? "Generando simulación…" : "Generar con IA"}
-          </button>
-          {error && <p className="mt-4 text-destructive">{error}</p>}
-          {result && (
-            <img src={result} alt="Simulación del cartel" className={`mt-6 w-full rounded-xl transition-[filter] duration-700 ${final ? "blur-0" : "blur-2xl"}`} />
-          )}
-        </Step>
+          <div className="grid gap-5">
+            <Step n={1} title="Subí tus imágenes" done={!!foto && !!logo}>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Upload label="Foto del local" file={foto} onFile={setFoto} />
+                <Upload label="Tu logo" file={logo} onFile={setLogo} />
+              </div>
+            </Step>
 
-        <Step n={4} title="Descargar">
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <a href={result && final ? result : undefined} download="npg-studio-simulacion.png"
-              className={`flex-1 rounded-full border border-primary py-3 text-center font-semibold text-primary transition hover:bg-accent ${result && final ? "" : "pointer-events-none opacity-40"}`}>
-              Descargar PNG
-            </a>
-            <a href={`https://wa.me/${WHATSAPP}?text=${waText}`} target="_blank" rel="noreferrer"
-              className="flex-1 rounded-full bg-whatsapp py-3 text-center font-semibold text-whatsapp-foreground transition hover:opacity-90">
-              Enviar por WhatsApp
-            </a>
+            <Step n={2} title="Configurá el cartel" done={false}>
+              <div className="grid gap-6">
+                <div>
+                  <p className="mb-3 text-sm font-semibold text-muted-foreground">Tipo de cartel</p>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {TIPOS.map((t) => (
+                      <button key={t.id} type="button" onClick={() => set("tipo")(t.id)}
+                        className={`rounded-xl border p-4 text-left transition ${cfg.tipo === t.id ? "border-neon bg-accent shadow-glow" : "border-border bg-secondary/50 hover:border-neon"}`}>
+                        <span className="block font-display text-sm">{t.id}</span>
+                        <span className="mt-1 block text-sm text-muted-foreground">{t.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div><p className="mb-3 text-sm font-semibold text-muted-foreground">Tamaño</p><Chips options={TAMANOS} value={cfg.tamano} onChange={set("tamano")} /></div>
+                <div><p className="mb-3 text-sm font-semibold text-muted-foreground">Iluminación</p><Chips options={ILUMINACION} value={cfg.iluminacion} onChange={set("iluminacion")} /></div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="grid gap-2"><span className="text-sm font-semibold text-muted-foreground">Colores</span>
+                    <input value={cfg.colores} onChange={(e) => set("colores")(e.target.value)} placeholder="Ej: blanco cálido y dorado" className="rounded-xl border border-input bg-muted/60 px-4 py-3 outline-none transition focus:border-neon" />
+                  </label>
+                  <label className="grid gap-2"><span className="text-sm font-semibold text-muted-foreground">Posición / notas (opcional)</span>
+                    <input value={cfg.notas} onChange={(e) => set("notas")(e.target.value)} placeholder="Ej: sobre la marquesina" className="rounded-xl border border-input bg-muted/60 px-4 py-3 outline-none transition focus:border-neon" />
+                  </label>
+                </div>
+              </div>
+            </Step>
+
+            <Step n={3} title="Generá la simulación" done={ready}>
+              <button onClick={generar} disabled={loading}
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-brand py-4 font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60">
+                {loading ? <><Loader2 className="h-5 w-5 animate-spin" /> Generando simulación…</> : <><Wand2 className="h-5 w-5" /> Generar con IA</>}
+              </button>
+              {error && <p role="alert" className="mt-4 rounded-xl border border-destructive/50 bg-destructive/10 px-4 py-3 text-destructive">{error}</p>}
+              {ready && <p className="mt-4 flex items-center gap-2 text-success"><Sparkles className="h-4 w-4" /> ¡Simulación lista!</p>}
+              {result ? (
+                <img src={result} alt="Simulación del cartel" className={`mt-6 w-full rounded-2xl border border-border transition-[filter] duration-700 ${final ? "blur-0" : "blur-2xl"}`} />
+              ) : (
+                <div className="mt-6 flex aspect-video items-center justify-center rounded-2xl border border-dashed border-border bg-muted/40 text-center text-muted-foreground">
+                  {loading ? "La IA está trabajando en tu cartel…" : "Acá vas a ver tu cartel en la fachada"}
+                </div>
+              )}
+            </Step>
+
+            <Step n={4} title="Descargá y enviá" done={false}>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <a href={ready ? result! : undefined} download="npg-studio-simulacion.png" aria-disabled={!ready}
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-full border border-neon py-3.5 font-semibold text-neon transition hover:bg-accent ${ready ? "" : "pointer-events-none opacity-40"}`}>
+                  <Download className="h-4 w-4" /> Descargar PNG
+                </a>
+                <a href={waLink} target="_blank" rel="noreferrer"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-full bg-whatsapp py-3.5 font-semibold text-whatsapp-foreground transition hover:opacity-90">
+                  <MessageCircle className="h-4 w-4" /> Enviar por WhatsApp
+                </a>
+              </div>
+              <p className="mt-3 text-sm text-muted-foreground">WhatsApp: 297 516-9780 · Adjuntá la imagen descargada al chat.</p>
+            </Step>
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">WhatsApp: 297 516-9780 · Adjuntá la imagen descargada al chat.</p>
-        </Step>
-      </div>
+        </div>
+      </section>
+
+      {/* TRABAJOS */}
+      <section id="trabajos" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20">
+        <SectionTitle kicker="PORTFOLIO" title="Nuestros trabajos" sub="Ideas que dejan huella." />
+        <div className="rounded-3xl border border-dashed border-border bg-card p-10 text-center">
+          <Sparkles className="mx-auto h-10 w-10 text-primary-glow" strokeWidth={1.5} />
+          <p className="mt-4 font-display text-lg">Muy pronto</p>
+          <p className="mx-auto mt-2 max-w-md text-muted-foreground">Estamos preparando la galería con nuestros proyectos reales.</p>
+        </div>
+      </section>
+
+      {/* POR QUÉ */}
+      <section className="mx-auto max-w-6xl px-5 py-20">
+        <SectionTitle title={<>¿Por qué elegir <span className="text-gradient">NPG</span>?</>} />
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+          {POR_QUE.map(({ icon: I, label }) => (
+            <div key={label} className="rounded-2xl border border-border bg-card p-6 text-center transition hover:border-neon">
+              <I className="mx-auto h-8 w-8 text-neon" strokeWidth={1.5} />
+              <p className="mt-3 text-sm font-semibold">{label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CONTACTO */}
+      <section id="contacto" className="relative scroll-mt-16 overflow-hidden px-5 py-24">
+        <img src={spaceBg} alt="" width={1920} height={1088} loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-50" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/40 to-background" />
+        <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-8 md:flex-row">
+          <img src={alien} alt="" width={200} height={200} loading="lazy" className="w-36 animate-float md:w-52" />
+          <div className="text-center md:text-left">
+            <h2 className="text-3xl md:text-5xl">¿Listo para hacer <span className="text-gradient">despegar</span> tu idea?</h2>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
+              <a href={waContact} target="_blank" rel="noreferrer" className="rounded-full bg-gradient-brand px-8 py-4 text-center font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.03]">Contactanos</a>
+              <a href={waLink} target="_blank" rel="noreferrer" className="rounded-full border border-border px-8 py-4 text-center text-sm font-semibold transition hover:border-neon">Solicitar presupuesto</a>
+            </div>
+            <p className="mt-4 text-sm text-muted-foreground">WhatsApp: 297 516-9780</p>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">© NPG Diseño & Cartelería</footer>
     </main>
   );
 }
