@@ -68,7 +68,7 @@ function Step({ n, title, children }: { n: number; title: string; children: Reac
 function Index() {
   const [foto, setFoto] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
-  const [cfg, setCfg] = useState<SignConfig>({ tipo: TIPOS[0].id, tamano: TAMANOS[1], colores: "", iluminacion: ILUMINACION[3], notas: "" });
+  const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "Mediano (2 m)", colores: "", iluminacion: "Escena nocturna encendido", notas: "" });
   const [result, setResult] = useState<string | null>(null);
   const [final, setFinal] = useState(false);
   const [loading, setLoading] = useState(false);
