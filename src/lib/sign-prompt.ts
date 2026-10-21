@@ -14,7 +14,7 @@ export const TIPOS = [
   { id: "Impresión LED", desc: "Caja de luz con impresión retroiluminada" },
 ];
 export const TAMANOS = ["Chico (1 m)", "Mediano (2 m)", "Grande (3 m)", "Extra grande (4 m+)"];
-export const ILUMINACION = ["Día, sin luz", "Luz frontal", "Retroiluminado (halo)", "Escena nocturna encendido"];
+export const ILUMINACION = ["Retroiluminado blanco cálido"];
 
 const ESTILO: Record<string, string> = {
   "Corpóreo LED": "dimensional 3D channel letters with built-in LED lighting",

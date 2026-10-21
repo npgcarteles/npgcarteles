@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+const MAX_PRUEBAS = 2;
+const ANCHOS = ["1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5"];
+const ALTOS = ["0.3", "0.4", "0.5", "0.6", "0.8", "1"];
 import { Award, Box, Brush, Check, Download, HeartHandshake, ImagePlus, Lightbulb, Loader2, Menu, MessageCircle, Palette, PenTool, Printer, Rocket, Sparkles, Store, Users, X, Layers, Wand2 } from "lucide-react";
 import spaceBg from "@/assets/space-bg.jpg";
 import alien from "@/assets/alien.png";
@@ -320,7 +323,7 @@ function Index() {
             <Step n={3} title="Generá la simulación" done={ready}>
               <button onClick={generar} disabled={loading}
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-brand py-4 font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60">
-                {loading ? <><Loader2 className="h-5 w-5 animate-spin" /> Generando simulación…</> : <><Wand2 className="h-5 w-5" /> Generar con IA</>}
+                {loading ? <><Loader2 className="h-5 w-5 animate-spin" /> Generando simulación…</> : <><Wand2 className="h-5 w-5" /> Generar con IA ({restantes} de {MAX_PRUEBAS} pruebas)</>}
               </button>
               {error && <p role="alert" className="mt-4 rounded-xl border border-destructive/50 bg-destructive/10 px-4 py-3 text-destructive">{error}</p>}
               {ready && <p className="mt-4 flex items-center gap-2 text-success"><Sparkles className="h-4 w-4" /> ¡Simulación lista!</p>}
