@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Award, Box, Brush, Check, Download, HeartHandshake, ImagePlus, Lightbulb, Loader2, Menu, MessageCircle, Palette, PenTool, Printer, Rocket, Sparkles, Store, Users, X, Layers, Wand2 } from "lucide-react";
 import spaceBg from "@/assets/space-bg.jpg";
 import alien from "@/assets/alien.png";
+import npgLogo from "@/assets/npg-logo.png.asset.json";
 import { streamImage } from "@/lib/stream-image";
 import { buildPrompt, ILUMINACION, TAMANOS, TIPOS, type SignConfig } from "@/lib/sign-prompt";
 
@@ -61,7 +62,7 @@ function Alien({ className = "" }: { className?: string }) {
       >
         <img
           src={alien}
-          alt="Alien mascota de NPG con gorra y buzo negros"
+          alt="Alien mascota de NPG con gorra y buzo con el logo"
           width={1024}
           height={1024}
           className={`w-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)] transition-transform duration-500 hover:-rotate-3 hover:scale-105 ${hop ? "-translate-y-6 scale-105" : ""}`}
@@ -76,7 +77,7 @@ function Nav() {
   return (
     <nav className="glass fixed inset-x-0 top-0 z-50 border-b border-border">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-        <a href="#inicio" className="font-display text-xl tracking-wider"><span className="text-gradient">NPG</span></a>
+        <a href="#inicio" aria-label="NPG Diseño & Cartelería — Inicio"><img src={npgLogo.url} alt="NPG Diseño & Cartelería" width={672} height={679} className="h-11 w-auto" /></a>
         <ul className="hidden gap-7 text-sm md:flex">
           {NAV.map((n) => (
             <li key={n.id}><a href={`#${n.id}`} className="text-muted-foreground transition hover:text-foreground">{n.label}</a></li>
@@ -199,7 +200,7 @@ function Index() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40" />
         <div className="relative mx-auto grid w-full max-w-6xl items-center gap-6 px-5 py-12 md:grid-cols-2">
           <div className="animate-rise text-center md:text-left">
-            <p className="mb-4 text-xs font-semibold tracking-[0.3em] text-neon">NPG DISEÑO & CARTELERÍA</p>
+            <img src={npgLogo.url} alt="NPG Diseño & Cartelería" width={672} height={679} className="mx-auto mb-6 h-24 w-auto drop-shadow-[0_0_24px_rgba(118,43,255,0.6)] md:mx-0 md:h-32" />
             <h1 className="text-[2.6rem] leading-[1.02] sm:text-6xl lg:text-7xl">
               Armá tu cartel<br /><span className="text-gradient">corpóreo LED</span>
             </h1>
