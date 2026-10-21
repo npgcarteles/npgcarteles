@@ -10,7 +10,7 @@ import { formatARS, STATUS_LABEL, STATUS_MESSAGE, type OrderConfig, type Payment
 const ANCHOS = [2, 2.5, 3, 3.5, 4, 4.5, 5];
 const ALTOS = [0.3, 0.4, 0.5, 0.6, 0.8, 1];
 
-export const orderQuery = (id: string) => queryOptions({ queryKey: ["order", id], queryFn: () => getOrder({ data: { id } }) });
+const orderQuery = (id: string) => queryOptions({ queryKey: ["order", id], queryFn: () => getOrder({ data: { id } }) });
 
 export const Route = createFileRoute("/_authenticated/pedidos/$id")({
   validateSearch: (s: Record<string, unknown>) => ({

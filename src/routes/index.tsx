@@ -1,4 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { saveDraft } from "@/lib/draft-store";
+import { AccountLinks } from "@/components/site-header";
 import { useEffect, useState } from "react";
 const MAX_PRUEBAS = 2;
 const ANCHOS = ["2", "2.5", "3", "3.5", "4", "4.5", "5"];
@@ -86,6 +88,7 @@ function Nav() {
             <li key={n.id}><a href={`#${n.id}`} className="text-muted-foreground transition hover:text-foreground">{n.label}</a></li>
           ))}
         </ul>
+        <AccountLinks className="hidden md:flex" />
         <button className="p-2 md:hidden" aria-label={open ? "Cerrar menú" : "Abrir menú"} onClick={() => setOpen(!open)}>
           {open ? <X /> : <Menu />}
         </button>
@@ -95,6 +98,7 @@ function Nav() {
           {NAV.map((n) => (
             <li key={n.id}><a onClick={() => setOpen(false)} href={`#${n.id}`} className="block rounded-lg px-3 py-3 hover:bg-accent">{n.label}</a></li>
           ))}
+          <li className="px-3 py-3"><AccountLinks /></li>
         </ul>
       )}
     </nav>
@@ -229,6 +233,17 @@ function Index() {
   const waLink = `https://wa.me/${WHATSAPP}?text=${waText}`;
   const waContact = `https://wa.me/${WHATSAPP}`;
   const ready = !!(result && final);
+  const navigate = useNavigate();
+  const [saving, setSaving] = useState(false);
+  async function continuarPedido() {
+    if (!result) return;
+    setSaving(true);
+    try {
+      const preview = await (await fetch(result)).blob();
+      await saveDraft({ preview, logo, savedAt: Date.now(), config: { tipo: cfg.tipo, ancho: Number(ancho), alto: Number(alto), colores: cfg.colores, iluminacion: cfg.iluminacion, notas: cfg.notas } });
+      navigate({ to: "/pedido/nuevo" });
+    } catch { setError("No se pudo preparar el pedido. Probá de nuevo."); setSaving(false); }
+  }
   const progress = [!!foto && !!logo, true, ready, ready].filter(Boolean).length;
 
   return (
@@ -339,6 +354,10 @@ function Index() {
             </Step>
 
             <Step n={4} title="Descargá y enviá" done={false}>
+              <button onClick={continuarPedido} disabled={!ready || saving}
+                className="mb-3 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-brand py-4 font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40">
+                {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />} CONTINUAR CON EL PEDIDO
+              </button>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <a href={ready ? result! : undefined} download="npg-studio-simulacion.png" aria-disabled={!ready}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-full border border-neon py-3.5 font-semibold text-neon transition hover:bg-accent ${ready ? "" : "pointer-events-none opacity-40"}`}>
