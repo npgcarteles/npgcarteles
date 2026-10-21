@@ -61,7 +61,7 @@ export function OrderCheckout({ total, paid, options, selected, isOwner, busy, e
         {options.length > 1 && isOwner && (
           <fieldset className="mt-8">
             <legend className="mb-3 text-base font-bold">Modalidad de pago</legend>
-            <RadioGroup value={selected?.kind} onValueChange={(v) => { const o = options.find((item) => item.kind === v); if (o) { onKind(o.kind); setMethod(""); } }} disabled={busy}>
+            <RadioGroup value={selected?.kind ?? ""} onValueChange={(v) => { const o = options.find((item) => item.kind === v); if (o) { onKind(o.kind); setMethod(""); } }} disabled={busy}>
               {options.map((o) => <label key={o.kind} className="flex cursor-pointer items-center gap-3 border-b border-border py-3 text-sm"><RadioGroupItem value={o.kind} /><span className="flex-1">{o.label}</span><span className="font-semibold">{formatARS(o.amount)}</span></label>)}
             </RadioGroup>
           </fieldset>
