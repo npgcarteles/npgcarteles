@@ -8,7 +8,7 @@ import spaceBg from "@/assets/space-bg.jpg";
 import alien from "@/assets/alien.png";
 import npgLogo from "@/assets/npg-logo.png.asset.json";
 import { streamImage } from "@/lib/stream-image";
-import { buildPrompt, ILUMINACION, TIPOS, type SignConfig } from "@/lib/sign-prompt";
+import { buildPrompt, ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
 
 const WHATSAPP = "5492975169780";
 
@@ -210,6 +210,8 @@ function Index() {
     form.append("prompt", buildPrompt(cfg));
     form.append("image[]", foto);
     form.append("image[]", logo);
+    form.append("size", "1536x1024");
+    form.append("quality", "high");
     try {
       await streamImage("/api/edit-image", form, (src, isFinal) => { setResult(src); setFinal(isFinal); });
       const n = usadas + 1;
@@ -389,6 +391,16 @@ function Index() {
               <a href={waLink} target="_blank" rel="noreferrer" className="rounded-full border border-border px-8 py-4 text-center text-sm font-semibold transition hover:border-neon">Solicitar presupuesto</a>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">WhatsApp: 297 516-9780</p>
+            <div className="mt-8 rounded-2xl border border-border bg-secondary/50 p-5 text-left">
+              <p className="font-display text-sm">Carteles personalizados</p>
+              <p className="mt-1 text-sm text-muted-foreground">Estas opciones se cotizan a medida. Consultanos por privado:</p>
+              <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                {PERSONALIZADOS.map((t) => (
+                  <li key={t.id} className="text-sm"><span className="font-semibold">{t.id}</span> <span className="text-muted-foreground">— {t.desc}</span></li>
+                ))}
+              </ul>
+              <a href={waContact} target="_blank" rel="noreferrer" className="mt-4 inline-block text-sm text-neon underline">Consultar por WhatsApp</a>
+            </div>
           </div>
         </div>
       </section>

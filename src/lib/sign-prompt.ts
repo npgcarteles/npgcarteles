@@ -8,6 +8,8 @@ export type SignConfig = {
 
 export const TIPOS = [
   { id: "Corpóreo LED", desc: "Letras 3D iluminadas con LED" },
+];
+export const PERSONALIZADOS = [
   { id: "Black Night", desc: "Frente negro que se ilumina de noche" },
   { id: "Cartelería en Polyfan", desc: "Panel liviano y resistente" },
   { id: "Vinilos", desc: "Vinilo adhesivo sobre vidriera o pared" },
@@ -17,7 +19,7 @@ export const TAMANOS = ["Chico (1 m)", "Mediano (2 m)", "Grande (3 m)", "Extra g
 export const ILUMINACION = ["Retroiluminado blanco cálido"];
 
 const ESTILO: Record<string, string> = {
-  "Corpóreo LED": "dimensional 3D channel letters with built-in LED lighting",
+  "Corpóreo LED": "premium dimensional 3D channel letters (about 5-8 cm deep) with metal or acrylic returns, opal acrylic faces, internal LED modules and standoff mounting a few cm off the wall, crisp clean edges",
   "Black Night": "black acrylic panel that looks black by day and glows through the logo at night",
   "Cartelería en Polyfan": "lightweight flat polyfan (aluminum composite) panel sign",
   "Vinilos": "adhesive vinyl applied directly on the glass or wall",
