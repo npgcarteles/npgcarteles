@@ -106,6 +106,6 @@ function NuevoPedido() {
   );
 }
 
-export function Item({ k, v }: { k: string; v: string }) {
+function Item({ k, v }: { k: string; v: string }) {
   return <div className="rounded-xl bg-secondary/50 p-3"><dt className="text-xs text-muted-foreground">{k}</dt><dd className="mt-1 font-semibold">{v}</dd></div>;
 }

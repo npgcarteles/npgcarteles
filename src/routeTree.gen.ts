@@ -10,7 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
+import { Route as AuthenticatedPedidoNuevoRouteImport } from './routes/_authenticated/pedido.nuevo'
+import { Route as AuthenticatedPedidosIndexRouteImport } from './routes/_authenticated/pedidos.index'
 import { Route as ApiPublicMercadopagoWebhookRouteImport } from './routes/api/public/mercadopago.webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -18,11 +22,32 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiEditImageRoute = ApiEditImageRouteImport.update({
   id: '/api/edit-image',
   path: '/api/edit-image',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPedidoNuevoRoute =
+  AuthenticatedPedidoNuevoRouteImport.update({
+    id: '/pedido/nuevo',
+    path: '/pedido/nuevo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPedidosIndexRoute =
+  AuthenticatedPedidosIndexRouteImport.update({
+    id: '/pedidos/',
+    path: '/pedidos/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicMercadopagoWebhookRoute =
   ApiPublicMercadopagoWebhookRouteImport.update({
     id: '/api/public/mercadopago/webhook',
@@ -32,30 +57,62 @@ const ApiPublicMercadopagoWebhookRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/api/edit-image': typeof ApiEditImageRoute
+  '/pedido/nuevo': typeof AuthenticatedPedidoNuevoRoute
+  '/pedidos/': typeof AuthenticatedPedidosIndexRoute
   '/api/public/mercadopago/webhook': typeof ApiPublicMercadopagoWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/api/edit-image': typeof ApiEditImageRoute
+  '/pedido/nuevo': typeof AuthenticatedPedidoNuevoRoute
+  '/pedidos': typeof AuthenticatedPedidosIndexRoute
   '/api/public/mercadopago/webhook': typeof ApiPublicMercadopagoWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/api/edit-image': typeof ApiEditImageRoute
+  '/_authenticated/pedido/nuevo': typeof AuthenticatedPedidoNuevoRoute
+  '/_authenticated/pedidos/': typeof AuthenticatedPedidosIndexRoute
   '/api/public/mercadopago/webhook': typeof ApiPublicMercadopagoWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/edit-image' | '/api/public/mercadopago/webhook'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/api/edit-image'
+    | '/pedido/nuevo'
+    | '/pedidos/'
+    | '/api/public/mercadopago/webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/edit-image' | '/api/public/mercadopago/webhook'
-  id: '__root__' | '/' | '/api/edit-image' | '/api/public/mercadopago/webhook'
+  to:
+    | '/'
+    | '/auth'
+    | '/api/edit-image'
+    | '/pedido/nuevo'
+    | '/pedidos'
+    | '/api/public/mercadopago/webhook'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/api/edit-image'
+    | '/_authenticated/pedido/nuevo'
+    | '/_authenticated/pedidos/'
+    | '/api/public/mercadopago/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
   ApiPublicMercadopagoWebhookRoute: typeof ApiPublicMercadopagoWebhookRoute
 }
@@ -69,12 +126,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/edit-image': {
       id: '/api/edit-image'
       path: '/api/edit-image'
       fullPath: '/api/edit-image'
       preLoaderRoute: typeof ApiEditImageRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/pedido/nuevo': {
+      id: '/_authenticated/pedido/nuevo'
+      path: '/pedido/nuevo'
+      fullPath: '/pedido/nuevo'
+      preLoaderRoute: typeof AuthenticatedPedidoNuevoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pedidos/': {
+      id: '/_authenticated/pedidos/'
+      path: '/pedidos'
+      fullPath: '/pedidos/'
+      preLoaderRoute: typeof AuthenticatedPedidosIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/mercadopago/webhook': {
       id: '/api/public/mercadopago/webhook'
@@ -86,8 +171,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedPedidoNuevoRoute: typeof AuthenticatedPedidoNuevoRoute
+  AuthenticatedPedidosIndexRoute: typeof AuthenticatedPedidosIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedPedidoNuevoRoute: AuthenticatedPedidoNuevoRoute,
+  AuthenticatedPedidosIndexRoute: AuthenticatedPedidosIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   ApiEditImageRoute: ApiEditImageRoute,
   ApiPublicMercadopagoWebhookRoute: ApiPublicMercadopagoWebhookRoute,
 }
