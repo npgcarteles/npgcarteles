@@ -13,7 +13,7 @@ const ALTOS = [0.3, 0.4, 0.5, 0.6, 0.8, 1];
 const orderQuery = (id: string) => queryOptions({ queryKey: ["order", id], queryFn: () => getOrder({ data: { id } }) });
 
 export const Route = createFileRoute("/_authenticated/pedidos/$id")({
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): { payment_id?: string } => ({
     payment_id: typeof s["payment_id"] === "string" || typeof s["payment_id"] === "number" ? String(s["payment_id"]) : undefined,
   }),
   loader: ({ context, params }) => context.queryClient.ensureQueryData(orderQuery(params.id)),
