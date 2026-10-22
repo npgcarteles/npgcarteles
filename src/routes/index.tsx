@@ -204,7 +204,7 @@ function SectionTitle({ kicker, title, sub }: { kicker?: string; title: React.Re
 
 async function reducePhoto(file: File) {
   const bmp = await createImageBitmap(file);
-  const k = Math.min(1, 1024 / Math.max(bmp.width, bmp.height));
+  const k = Math.min(1, 1400 / Math.max(bmp.width, bmp.height));
   const c = document.createElement("canvas"); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
   c.getContext("2d")?.drawImage(bmp, 0, 0, c.width, c.height);
   return { image: c.toDataURL("image/jpeg", 0.85), w: bmp.width, h: bmp.height };
@@ -244,11 +244,7 @@ function Index() {
       setSurface(placed.surface); setEstimada(placed.estimated);
       const r = await composeMontage(foto, logo, placed.surface, Number(ancho), Number(alto), cfg.iluminacion === "Luz cálida");
       if (revision.current !== startedRevision) throw new Error("La configuración cambió. Generá un montaje nuevo.");
-      setResult(URL.createObjectURL(r.blob));
-      let blob = r.blob;
-      try { blob = await enhanceSign(r.blob, logo, r.mask, r.face, cfg.iluminacion === "Luz cálida"); } catch (e) { console.error("enhance", e); setError("No se pudo aplicar la iluminación con IA; se muestra el montaje base con el tamaño y la ubicación correctos."); }
-      if (revision.current !== startedRevision) throw new Error("La configuración cambió. Generá un montaje nuevo.");
-      setResult(URL.createObjectURL(blob)); setFinal(true);
+      setResult(URL.createObjectURL(r.blob)); setFinal(true);
       const n = usadas + 1;
       localStorage.setItem("npg-pruebas", String(n)); setUsadas(n);
     } catch (e) {
