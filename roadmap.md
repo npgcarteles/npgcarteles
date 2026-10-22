@@ -24,6 +24,7 @@
 - [x] Probar 1, 2, 3 y 5 m, proporciones, superficie insuficiente y fondo sin regenerar.
 
 # Corrección del simulador
+- [ ] Aplicar puerta de 2 metros y perspectiva calculada antes de generar; bloquear referencias insuficientes y superficies donde no cabe; probar flujo sin alterar precios.
 - [x] Restaurar edición completa por IA con cartel protagonista como los trabajos, conservar luz elegida y medidas/precios del pedido; generación final de 4 Metros verificada en navegador y 18 pruebas aprobadas.
 - [x] Ubicar el cartel en la franja superior con escala según la puerta y verificar que la foto no cambie fuera del cartel.
 - [x] Quitar WhatsApp/Instagram del envío del pedido y confirmar antes de enviar.
