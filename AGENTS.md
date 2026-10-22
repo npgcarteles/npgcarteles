@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
-- Manual order sharing lives in a browser-only presentation component with pure summary helpers; it uses saved order values, never changes order/payment states, and never includes temporary private image URLs in external messages.
+- Orders are sent only through the internal order system (no WhatsApp/Instagram order sharing) so every request is persisted before confirmation.
 - Order prices, statuses and payment amounts are computed and written only in server functions (`src/lib/orders.functions.ts`) with the admin client; clients only have SELECT RLS, so the browser can never set price or "approved".
 - Payments use Mercado Pago Checkout Pro; a payment counts only after the server re-reads it from MP's API (webhook with signature check or return-page sync), keyed by `payments.id` as external_reference.
 - Pure pricing/payment/status rules live in `src/lib/orders.shared.ts` with tests next to it.
