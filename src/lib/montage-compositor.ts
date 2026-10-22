@@ -75,7 +75,7 @@ export async function composeMontage(photo: Blob, logo: Blob, surface: Surface, 
   for (const [b, a] of [[blur * 2.6, 0.45], [blur * 1.5, 0.65], [blur * 0.8, 0.85]] as const) {
     ctx.save(); ctx.shadowColor = `rgba(${glow},${a})`; ctx.shadowBlur = b; ctx.drawImage(warped.c, x0, y0); ctx.restore();
   }
-  // 4. Lit acrylic face on top.
+  // 5. Lit acrylic face on top.
   ctx.save(); ctx.filter = "brightness(1.1)"; ctx.drawImage(warped.c, x0, y0); ctx.restore();
   ctx.restore();
   if (!verifyUntouched(original, ctx.getImageData(0, 0, c.width, c.height), mask)) throw new Error("La simulación modificó zonas de la foto fuera del cartel. Probá de nuevo.");
