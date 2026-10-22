@@ -15,4 +15,4 @@
 # Corrección del simulador
 - [x] Ubicar el cartel en la franja superior con escala según la puerta y verificar que la foto no cambie fuera del cartel.
 - [x] Quitar WhatsApp/Instagram del envío del pedido y confirmar antes de enviar.
-- [ ] Cartel iluminado realista como 'Nuestros trabajos', a escala real y en su lugar.
+- [x] Cartel iluminado realista como 'Nuestros trabajos', a escala real y en su lugar.
