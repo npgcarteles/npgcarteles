@@ -69,7 +69,9 @@ export async function composeMontage(photo: Blob, logo: Blob, surface: Surface, 
   ctx.save(); ctx.filter = "brightness(0)"; ctx.globalAlpha = 0.3; ctx.shadowColor = "rgba(0,0,0,0.55)"; ctx.shadowBlur = blur * 0.8; ctx.shadowOffsetY = depth; ctx.drawImage(warped.c, x0 + depth * 0.4, y0 + depth); ctx.restore();
   // 2. Channel-letter depth: stacked darkened returns down-right.
   ctx.save(); ctx.filter = "brightness(0.42) saturate(0.85)"; for (let i = depth; i > 0; i--) ctx.drawImage(warped.c, x0 + i * 0.35, y0 + i * 0.7); ctx.restore();
-  // 3. LED halo bloom: layered glow spilling onto the wall.
+  // 3. Edge separation: soft dark keyline so letters lift off bright walls or existing signs.
+  for (let i = 0; i < 2; i++) { ctx.save(); ctx.shadowColor = "rgba(0,0,0,0.55)"; ctx.shadowBlur = blur * 0.6; ctx.drawImage(warped.c, x0, y0); ctx.restore(); }
+  // 4. LED halo bloom: layered glow spilling onto the wall.
   for (const [b, a] of [[blur * 2.6, 0.45], [blur * 1.5, 0.65], [blur * 0.8, 0.85]] as const) {
     ctx.save(); ctx.shadowColor = `rgba(${glow},${a})`; ctx.shadowBlur = b; ctx.drawImage(warped.c, x0, y0); ctx.restore();
   }
