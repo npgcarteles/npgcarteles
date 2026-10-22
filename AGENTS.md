@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
-- Storefront simulations calibrate only complete, frontal, coplanar entrance doors before generation; a deterministic projection locks the logo envelope and a masked streaming AI edit supplies local materials/light, with the calibrated face reapplied to prevent resizing. Reject insufficient geometry instead of guessing; ordered dimensions and server prices stay unchanged.
+- Storefront simulations use the streaming AI edit endpoint with ordered original facade, customer logo and portfolio material references; facade-based placement and perspective are illustrative without door calibration or deterministic face overlays. Ordered dimensions and server prices remain unchanged.
 - Orders are sent only through the internal order system (no WhatsApp/Instagram order sharing) so every request is persisted before confirmation.
 - Order prices, statuses and payment amounts are computed and written only in server functions (`src/lib/orders.functions.ts`) with the admin client; clients only have SELECT RLS, so the browser can never set price or "approved".
 - Payments use Mercado Pago Checkout Pro; a payment counts only after the server re-reads it from MP's API (webhook with signature check or return-page sync), keyed by `payments.id` as external_reference.

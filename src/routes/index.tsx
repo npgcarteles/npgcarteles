@@ -15,7 +15,6 @@ import trChipa from "@/assets/trabajo-senor-chipa.png.asset.json";
 import trQueso from "@/assets/trabajo-punto-queso.png.asset.json";
 import npgLogo from "@/assets/npg-logo.png.asset.json";
 import { streamImage } from "@/lib/stream-image";
-import { calibratedPlacement, type ScaleAnalysis } from "@/lib/sign-scale";
 import { Button } from "@/components/ui/button";
 import { buildPrompt, ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
 
@@ -227,25 +226,8 @@ function Index() {
     setError(null); setLoading(true); setResult(null); setFinal(false);
     const startedRevision = revision.current;
     try {
-      const photoUrl=URL.createObjectURL(foto);
-      const image=new Image();
-      try { image.src=photoUrl; await image.decode(); } finally { URL.revokeObjectURL(photoUrl); }
-      const analysisCanvas=document.createElement("canvas");
-      const ratio=Math.min(1,1400/Math.max(image.naturalWidth,image.naturalHeight));
-      analysisCanvas.width=Math.round(image.naturalWidth*ratio); analysisCanvas.height=Math.round(image.naturalHeight*ratio);
-      const ctx=analysisCanvas.getContext("2d");
-      if(!ctx) throw new Error("No se pudo leer la foto.");
-      ctx.drawImage(image,0,0,analysisCanvas.width,analysisCanvas.height);
-      const analysisResponse=await fetch("/api/analyze-facade",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image:analysisCanvas.toDataURL("image/jpeg",0.85)})});
-      const analysis=await analysisResponse.json() as ScaleAnalysis & {error?:string};
-      if(!analysisResponse.ok) throw new Error(analysis.error ?? "No se pudo analizar la fachada.");
-      const placement=calibratedPlacement(analysis,image.naturalWidth,image.naturalHeight,Number(ancho),Number(alto));
-      const {prepareScaledEdit}=await import("@/lib/montage-compositor");
-      const prepared=await prepareScaledEdit(foto,logo,placement.surface,Number(ancho),Number(alto),cfg.iluminacion==="Luz cálida");
-      if(revision.current!==startedRevision) throw new Error("La configuración cambió. Generá un montaje nuevo.");
       const form = new FormData();
-      form.append("image[]", prepared.blob,"fachada-calibrada.png");
-      form.append("mask",prepared.maskBlob,"mascara.png");
+      form.append("image[]", foto);
       form.append("image[]", logo);
       const references = await Promise.all([trBocados.url, trChipa.url].map(async (url) => {
         const response = await fetch(url);
@@ -256,16 +238,11 @@ function Index() {
       form.append("prompt", buildPrompt(cfg));
       form.append("size", "auto");
       form.append("quality", "high");
-      let generated:string|null=null;
       await streamImage("/api/edit-image", form, (src, isFinal) => {
         if (revision.current !== startedRevision) return;
-        if(isFinal) generated=src;
-        else setResult(src);
+        setResult(src); setFinal(isFinal);
       });
-      if(!generated) throw new Error("La IA no devolvió una imagen final.");
-      const calibrated=await prepared.finish(generated);
       if (revision.current !== startedRevision) throw new Error("La configuración cambió. Generá un montaje nuevo.");
-      setResult(calibrated); setFinal(true);
       const n = usadas + 1;
       localStorage.setItem("npg-pruebas", String(n)); setUsadas(n);
     } catch (e) {
@@ -389,7 +366,7 @@ function Index() {
               {result ? (
                 <img src={result} alt="Simulación del cartel" className={`mt-6 w-full rounded-2xl border border-border transition-[filter] duration-700 ${final ? "blur-0" : "blur-2xl"}`} />
               ) : null}
-              {result && <p className="mt-3 text-sm font-semibold">Medida del pedido: {ancho} m × {alto} m · Referencia: puerta de 2 metros. Vista ilustrativa: escala real no verificada.</p>}
+              {result && <p className="mt-3 text-sm font-semibold">Medida del pedido: {ancho} m × {alto} m · Vista ilustrativa: escala real no verificada.</p>}
               <p role="note" className="mt-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-xs leading-5 text-muted-foreground">
                   <strong className="text-foreground">Aviso importante:</strong> Este contenido visual corresponde a una simulación gráfica optimizada. Ha sido generado exclusivamente como una muestra de referencia estética, por lo que no constituye una oferta contractual ni una réplica exacta del entregable final.
               </p>
