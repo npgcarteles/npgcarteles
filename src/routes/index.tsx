@@ -14,6 +14,7 @@ import trChipa from "@/assets/trabajo-senor-chipa.png.asset.json";
 import trQueso from "@/assets/trabajo-punto-queso.png.asset.json";
 import npgLogo from "@/assets/npg-logo.png.asset.json";
 import { composeMontage } from "@/lib/montage-compositor";
+import { enhanceSign } from "@/lib/sign-enhance";
 import { placementFromAnalysis, type Surface } from "@/lib/montage-geometry";
 import { Button } from "@/components/ui/button";
 import { ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
@@ -242,7 +243,11 @@ function Index() {
       setSurface(placed.surface); setEstimada(placed.estimated);
       const r = await composeMontage(foto, logo, placed.surface, Number(ancho), Number(alto), cfg.iluminacion === "Luz cálida");
       if (revision.current !== startedRevision) throw new Error("La configuración cambió. Generá un montaje nuevo.");
-      setResult(URL.createObjectURL(r.blob)); setFinal(true);
+      setResult(URL.createObjectURL(r.blob));
+      let blob = r.blob;
+      try { blob = await enhanceSign(r.blob, r.mask, r.face, cfg.iluminacion === "Luz cálida"); } catch { setError("No se pudo aplicar la iluminación con IA; se muestra el montaje base con el tamaño y la ubicación correctos."); }
+      if (revision.current !== startedRevision) throw new Error("La configuración cambió. Generá un montaje nuevo.");
+      setResult(URL.createObjectURL(blob)); setFinal(true);
       const n = usadas + 1;
       localStorage.setItem("npg-pruebas", String(n)); setUsadas(n);
     } catch (e) {

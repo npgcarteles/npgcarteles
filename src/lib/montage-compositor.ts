@@ -47,7 +47,7 @@ export async function composeMontage(photo: Blob, logo: Blob, surface: Surface, 
   ctx.restore();
   if(!verifyUntouched(original,ctx.getImageData(0,0,c.width,c.height),mask)) throw new Error("La simulación modificó zonas de la foto fuera del cartel. Probá de nuevo.");
   const blob=await new Promise<Blob>((resolve,reject)=>c.toBlob((b)=>b?resolve(b):reject(new Error("No se pudo exportar el montaje.")),"image/png"));
-  return {blob,corners,dimensions:d,mask};
+  return {blob,corners,dimensions:d,mask,face:{canvas:warped.c,x:x0,y:y0}};
 }
 /** True when every pixel outside the mask is identical to the original photo. */
 export function verifyUntouched(a: ImageData, b: ImageData, m: {x0:number;y0:number;x1:number;y1:number}) {
