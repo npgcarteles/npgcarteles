@@ -6,6 +6,8 @@
 - [ ] Verificar aprobación administrativa y apertura de Mercado Pago para el catálogo: la sesión disponible es de cliente, sin permisos administrativos; requiere aprobación de NPG.
 
 # Checkout NPG
+- [ ] Mover precios debajo de cada medida en personalización y conservar trabajos.
+- [ ] Auditar checkout, ocultar opciones sin integración y verificar flujo real disponible sin realizar cobros.
 - [x] Agregar envío manual del pedido por WhatsApp y resumen para Instagram; verificar destinos y presupuesto pendiente con tres pruebas.
 - [x] Envío social descartado; pedidos únicamente por el sistema interno.
 - [x] Adaptar el pago a la referencia blanca minimalista con marca NPG y total del pedido.
