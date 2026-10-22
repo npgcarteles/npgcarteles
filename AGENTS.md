@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
+- Visual preview enlargement is isolated in the browser compositor through a bounded, uniform geometry helper; purchased dimensions and server pricing remain unchanged to separate illustrative appearance from commercial authority.
 - Orders are sent only through the internal order system (no WhatsApp/Instagram order sharing) so every request is persisted before confirmation.
 - Order prices, statuses and payment amounts are computed and written only in server functions (`src/lib/orders.functions.ts`) with the admin client; clients only have SELECT RLS, so the browser can never set price or "approved".
 - Payments use Mercado Pago Checkout Pro; a payment counts only after the server re-reads it from MP's API (webhook with signature check or return-page sync), keyed by `payments.id` as external_reference.

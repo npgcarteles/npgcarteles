@@ -1,4 +1,5 @@
 # Tienda NPG
+- [ ] Dar más presencia ilustrativa al cartel sin cambiar medidas del pedido ni precios; mostrar «Metros» en el selector y verificar.
 - [x] Incorporar catálogo con cuatro precios exactos y conservar personalización y simulación.
 - [x] Guardar precio autorizado y retiro gratuito; confirmar disponibilidad sin simular pagos ni duplicar pedidos.
 - [x] Mostrar instalación separada y enlace oficial del taller en catálogo, resumen y pedido.

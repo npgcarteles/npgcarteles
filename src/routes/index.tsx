@@ -367,8 +367,8 @@ function Index() {
               {result ? (
                 <img src={result} alt="Simulación del cartel" className={`mt-6 w-full rounded-2xl border border-border transition-[filter] duration-700 ${final ? "blur-0" : "blur-2xl"}`} />
               ) : null}
-              {result && <p className="mt-3 text-sm font-semibold">{ancho} m × {alto} m · {estimada ? "Vista ilustrativa: no se detectó una puerta de referencia, ubicación y escala aproximadas" : "Escala estimada a partir de la puerta del local (≈2,1 m); no es una medición profesional"}</p>}
-              {result && <p className="mt-2 text-xs text-muted-foreground">El logo conserva sus proporciones dentro de estas medidas; puede dejar espacio libre. El montaje no elimina carteles existentes ni reproduce materiales y volumen de fabricación.</p>}
+              {result && <p className="mt-3 text-sm font-semibold">Medida del pedido: {ancho} m × {alto} m · Vista ilustrativa: escala real no verificada</p>}
+              {result && <p className="mt-2 text-xs text-muted-foreground">Tamaño visual ligeramente ampliado para destacar el cartel; no representa una medición real. El logo conserva sus proporciones. El montaje no elimina carteles existentes.</p>}
               <p role="note" className="mt-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-xs leading-5 text-muted-foreground">
                   <strong className="text-foreground">Aviso importante:</strong> Este contenido visual corresponde a una simulación gráfica optimizada. Ha sido generado exclusivamente como una muestra de referencia estética, por lo que no constituye una oferta contractual ni una réplica exacta del entregable final.
               </p>
