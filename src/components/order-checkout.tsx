@@ -1,9 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeft, Handshake, Loader2, LockKeyhole, MessageCircle, ShoppingBag } from "lucide-react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { formatARS, type PaymentKind, type PaymentOption } from "@/lib/orders.shared";
 import npgLogo from "@/assets/npg-logo.png.asset.json";
@@ -50,14 +48,9 @@ export function OrderCheckout({ total, paid, options, selected, isOwner, busy, e
     <section aria-label="Pago del pedido">
       <div className="bg-muted px-6 py-5 text-base font-bold">
         Total del cartel {total == null ? "· Pendiente de presupuesto" : formatARS(total)}
+        <p className="mt-2 text-xs font-normal text-muted-foreground">No incluye instalación; se cotiza por separado.</p>
       </div>
       <div className="px-6 py-7">
-        <h2 className="text-lg font-bold">Cupones de descuento y Gift Cards</h2>
-        <Accordion type="single" collapsible className="mt-3">
-          <Coupon value="gift" title="¿Tenés una Gift Card?" label="Código de Gift Card" />
-          <Coupon value="coupon" title="Cupón de descuento" label="Código de descuento" />
-        </Accordion>
-
         {options.length > 1 && isOwner && (
           <fieldset className="mt-8">
             <legend className="mb-3 text-base font-bold">Modalidad de pago</legend>
@@ -69,14 +62,12 @@ export function OrderCheckout({ total, paid, options, selected, isOwner, busy, e
 
         <h2 className="mb-2 mt-9 text-xl font-bold">Método de pago</h2>
         <RadioGroup aria-label="Método de pago" value={method} onValueChange={chooseMethod} className="gap-0">
-          <PaymentRow value="bank" disabled title="TARJETAS DE DÉBITO Y CRÉDITO (PROMOS BANCARIAS Y CUOTAS SIN INTERÉS)" note="No disponible" />
-          <PaymentRow value="mp-cards" disabled={!canPay} title="TARJETAS DE CRÉDITO Y DÉBITO" mp />
-          <PaymentRow value="mp" disabled={!canPay} title="MERCADO PAGO" mp />
-          <PaymentRow value="modo" disabled title="MODO" note="PAGÁ CON TU APP BANCARIA · No disponible" modo />
+          <PaymentRow value="mp" disabled={!canPay} title="MERCADO PAGO" note="Tarjetas y medios disponibles en el checkout seguro de Mercado Pago" />
         </RadioGroup>
 
         <div className="mt-6 space-y-3 text-sm">
           {total == null && <p className="text-muted-foreground">NPG está preparando tu presupuesto. El pago se habilita cuando esté confirmado.</p>}
+          {total != null && options.length === 0 && paid === 0 && <p className="text-muted-foreground">El pago no está habilitado. Revisá el estado de tu pedido y esperá la confirmación de NPG o Mercado Pago.</p>}
           {paid > 0 && <p className="flex justify-between"><span>Pagado</span><span>{formatARS(paid)}</span></p>}
           {paid > 0 && total != null && total > paid && <p className="flex justify-between"><span>Saldo pendiente</span><span>{formatARS(total - paid)}</span></p>}
           {selected && isOwner && <p className="flex justify-between font-bold"><span>Pagás ahora</span><span>{formatARS(selected.amount)}</span></p>}
@@ -91,26 +82,11 @@ export function OrderCheckout({ total, paid, options, selected, isOwner, busy, e
   );
 }
 
-function Coupon({ value, title, label }: { value: string; title: string; label: string }) {
-  const [code, setCode] = useState("");
-  const [notice, setNotice] = useState(false);
-  return <AccordionItem value={value}>
-    <AccordionTrigger className="min-h-14 text-sm font-normal hover:no-underline">{title}</AccordionTrigger>
-    <AccordionContent>
-      <form onSubmit={(e) => { e.preventDefault(); setNotice(true); }} className="flex gap-2">
-        <Input aria-label={label} placeholder={label} value={code} onChange={(e) => { setCode(e.target.value); setNotice(false); }} maxLength={80} className="h-11 min-w-0 rounded-none shadow-none" />
-        <Button type="submit" disabled={!code.trim()} className="h-11 rounded-none shadow-none">Aplicar</Button>
-      </form>
-      {notice && <p role="status" className="mt-3 text-xs text-muted-foreground">NPG todavía no tiene {value === "gift" ? "Gift Cards" : "cupones de descuento"} habilitados. No se aplicó ningún descuento.</p>}
-    </AccordionContent>
-  </AccordionItem>;
-}
-
-function PaymentRow({ value, disabled, title, note, mp, modo }: { value: string; disabled: boolean; title: string; note?: string; mp?: boolean; modo?: boolean }) {
+function PaymentRow({ value, disabled, title, note }: { value: string; disabled: boolean; title: string; note?: string }) {
   return <label className={`flex min-h-24 items-center gap-4 border-b border-border py-5 ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}>
     <RadioGroupItem value={value} disabled={disabled} aria-label={title} className="size-5 shrink-0 shadow-none" />
-    {mp && <Handshake aria-label="Mercado Pago" className="size-9 shrink-0 text-payment-brand" strokeWidth={1.5} />}
-    <span className="min-w-0 flex-1"><span className={modo ? "text-xl font-extrabold text-payment-modo" : "block text-[13px] font-medium leading-5"}>{title}</span>{note && <span className="mt-1 block text-[11px] leading-4 text-muted-foreground">{note}</span>}</span>
+    <Handshake aria-label="Mercado Pago" className="size-9 shrink-0 text-payment-brand" strokeWidth={1.5} />
+    <span className="min-w-0 flex-1"><span className="block text-[13px] font-medium leading-5">{title}</span>{note && <span className="mt-1 block text-[11px] leading-4 text-muted-foreground">{note}</span>}</span>
   </label>;
 }
 

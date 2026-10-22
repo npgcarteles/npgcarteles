@@ -1,13 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { StoreCatalog, InstallationNotice, WorkshopPickup } from "@/components/store-catalog";
+import { CatalogHeading, StoreCatalog, InstallationNotice, WorkshopPickup } from "@/components/store-catalog";
 import { SIGN_CATALOG, formatARS } from "@/lib/orders.shared";
 import { Input } from "@/components/ui/input";
 import { saveDraft } from "@/lib/draft-store";
 import { AccountLinks } from "@/components/site-header";
 import { useEffect, useRef, useState } from "react";
 const MAX_PRUEBAS = 2;
-const ANCHOS = SIGN_CATALOG.map((item) => String(item.width));
-const ALTO_POR_ANCHO: Record<string, string> = Object.fromEntries(SIGN_CATALOG.map((item) => [String(item.width), String(item.height)]));
 import { Award, Box, Brush, Check, Download, HeartHandshake, ImagePlus, Lightbulb, Loader2, Menu, MessageCircle, Palette, PenTool, Printer, Rocket, Sparkles, Store, Users, X, Layers, Wand2 } from "lucide-react";
 import spaceBg from "@/assets/space-bg.jpg";
 import alien from "@/assets/alien.png";
@@ -316,7 +314,7 @@ function Index() {
       {/* CONFIGURADOR */}
       <section id="crear" className="relative scroll-mt-16 border-y border-border px-5 py-16">
         <div className="relative mx-auto max-w-6xl">
-          <StoreCatalog width={Number(ancho)} onSelect={(a, h) => setMedida(String(a), String(h))} />
+          <CatalogHeading />
           <div className="mb-8 flex flex-col items-center gap-4 md:flex-row md:items-end md:justify-between">
             <div className="text-center md:text-left">
               <p className="mb-2 text-xs font-semibold tracking-[0.3em] text-neon">ESTUDIO NPG</p>
@@ -357,7 +355,7 @@ function Index() {
                 </div>
                 <div className="grid gap-4">
                   <p className="text-sm font-semibold text-muted-foreground">Medidas del cartel</p>
-                  <div><p className="mb-2 text-sm">Ancho</p><Chips options={ANCHOS.map((a) => `${a} m`)} value={`${ancho} m`} onChange={(v) => { const a = v.replace(" m", ""); setMedida(a, ALTO_POR_ANCHO[a] ?? "0.6"); }} /></div>
+                  <div><p className="mb-2 text-sm">Ancho · Precio en ARS</p><StoreCatalog width={Number(ancho)} onSelect={(a, h) => setMedida(String(a), String(h))} /><InstallationNotice /></div>
                 </div>
                 <div><p className="mb-3 text-sm font-semibold text-muted-foreground">Iluminación</p><Chips options={ILUMINACION} value={cfg.iluminacion} onChange={set("iluminacion")} />
                   <p className="mt-2 text-xs text-muted-foreground">¿Necesitás otro tipo de LED? <a href={waContact} target="_blank" rel="noreferrer" className="text-neon underline">Escribinos por privado</a>.</p></div>
