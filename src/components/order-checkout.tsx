@@ -32,11 +32,11 @@ type Props = {
   error: string | null;
   quoteNote: string | null;
   onKind: (kind: PaymentKind) => void;
-  const canPay = isOwner && !busy;
+  onPay: () => void;
 };
 
 export function OrderCheckout({ total, paid, options, selected, isOwner, busy, error, quoteNote, onKind, onPay }: Props) {
-  const canPay = isOwner && options.length > 0 && !busy;
+  const canPay = isOwner && !busy && total != null;
   const [method, setMethod] = useState("");
   function chooseMethod(value: string) {
     if (!canPay || !["mp-cards", "mp"].includes(value)) return;
@@ -61,19 +61,20 @@ export function OrderCheckout({ total, paid, options, selected, isOwner, busy, e
         )}
 
         <h2 className="mb-2 mt-9 text-xl font-bold">Método de pago</h2>
+        <RadioGroup aria-label="Método de pago" value={method} onValueChange={chooseMethod} className="gap-0">
           <PaymentRow value="mp" disabled={!canPay} title="MERCADO PAGO" note="Tarjetas y medios disponibles en el checkout seguro de Mercado Pago" />
         </RadioGroup>
 
         <div className="mt-6 space-y-3 text-sm">
           {total == null && <p className="text-muted-foreground">NPG está preparando tu presupuesto. El pago se habilita cuando esté confirmado.</p>}
-          {total != null && options.length === 0 && paid === 0 && <p className="text-muted-foreground">El pago no está habilitado. Revisá el estado de tu pedido y esperá la confirmación de NPG o Mercado Pago.</p>}
           {paid > 0 && <p className="flex justify-between"><span>Pagado</span><span>{formatARS(paid)}</span></p>}
           {paid > 0 && total != null && total > paid && <p className="flex justify-between"><span>Saldo pendiente</span><span>{formatARS(total - paid)}</span></p>}
           {selected && isOwner && <p className="flex justify-between font-bold"><span>Pagás ahora</span><span>{formatARS(selected.amount)}</span></p>}
+          {!selected && total != null && isOwner && <p className="flex justify-between font-bold"><span>Pagás ahora</span><span>{formatARS(total)}</span></p>}
           {quoteNote && <p className="border-l-2 border-border pl-3 text-muted-foreground">{quoteNote}</p>}
           {busy && <p role="status" className="flex items-center gap-2"><Loader2 className="size-4 animate-spin" /> Abriendo Mercado Pago…</p>}
           {error && <p role="alert" className="text-destructive">{error}</p>}
-          {error && selected && isOwner && <Button onClick={onPay} disabled={busy} className="w-full rounded-none shadow-none">Reintentar pago</Button>}
+          {error && isOwner && <Button onClick={onPay} disabled={busy} className="w-full rounded-none shadow-none">Reintentar pago</Button>}
           <p className="flex items-start gap-2 text-xs text-muted-foreground"><LockKeyhole className="size-4 shrink-0" /> Pago seguro con Mercado Pago. NPG no guarda datos de tarjetas.</p>
         </div>
       </div>
