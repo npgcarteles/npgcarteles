@@ -93,7 +93,7 @@ function PedidoDetalle() {
             <span className="text-xs text-muted-foreground">{STATUS_LABEL[order.status]}</span>
           </div>
           {!confirmed && cfg.catalogo && <p className="mt-5 flex items-center gap-2 font-semibold"><CheckCircle2 className="size-5 shrink-0" /> Solicitud registrada correctamente</p>}
-          {!confirmed && <p className="mt-3 text-sm leading-6 text-muted-foreground">{cfg.catalogo && order.status === "esperando_presupuesto" ? "NPG está revisando disponibilidad y detalles de fabricación. Tu precio de catálogo está registrado; el pago se habilita después de esa confirmación." : STATUS_MESSAGE[order.status]}</p>}
+          {!confirmed && <p className="mt-3 text-sm leading-6 text-muted-foreground">{cfg.catalogo && order.status === "esperando_presupuesto" ? "NPG está revisando disponibilidad y detalles de fabricación. Tu precio de catálogo está registrado y ya podés pagarlo." : STATUS_MESSAGE[order.status]}</p>}
           {data.previewUrl && <img src={data.previewUrl} alt="Simulación del cartel" className="mt-6 w-full" />}
           {data.previewUrl && <p className="mt-3 text-xs leading-5 text-muted-foreground">Aviso importante: Este contenido visual corresponde a una simulación gráfica optimizada. Ha sido generado exclusivamente como una muestra de referencia estética, por lo que no constituye una oferta contractual ni una réplica exacta del entregable final.</p>}
           {data.previewUrl && <p className="mt-3 text-xs text-muted-foreground">{cfg.montaje?.measured ? "Escala calibrada con medidas declaradas por el cliente; no es una medición profesional." : "Vista ilustrativa: escala real no verificada"}</p>}

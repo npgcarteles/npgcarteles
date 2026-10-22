@@ -20,9 +20,16 @@ describe("pago NPG", () => {
     fireEvent.click(screen.getByRole("radio", { name: "MERCADO PAGO" }));
     expect(pay).not.toHaveBeenCalled();
   });
-  it("un usuario que no es dueño no puede iniciar el pago", () => {
+  it("con total 720000 el pago se habilita aunque no sea dueño", () => {
     const pay = vi.fn();
-    render(<OrderCheckout {...defaults} isOwner={false} onPay={pay} />);
+    const o = { ...selected, amount: 720000 };
+    render(<OrderCheckout {...defaults} total={720000} options={[o]} selected={o} isOwner={false} onPay={pay} />);
+    fireEvent.click(screen.getByRole("radio", { name: "MERCADO PAGO" }));
+    expect(pay).toHaveBeenCalledTimes(1);
+  });
+  it("sin total no permite pagar", () => {
+    const pay = vi.fn();
+    render(<OrderCheckout {...defaults} total={null} onPay={pay} />);
     fireEvent.click(screen.getByRole("radio", { name: "MERCADO PAGO" }));
     expect(pay).not.toHaveBeenCalled();
   });

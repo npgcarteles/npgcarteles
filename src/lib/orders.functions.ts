@@ -3,7 +3,7 @@ import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
-  calcAutoQuote, catalogQuote, EDITABLE_STATUSES, formatNumero, PAYABLE_STATUSES, paymentOptions,
+  calcAutoQuote, catalogQuote, EDITABLE_STATUSES, formatNumero, paymentOptions,
   type OrderStatus, type PricingSettings,
 } from "./orders.shared";
 
@@ -119,9 +119,9 @@ export const getOrder = createServerFn({ method: "GET" })
       payments: (pays ?? []).map((p) => ({ ...p, amount_ars: Number(p.amount_ars) })),
       events: events ?? [],
       paid,
-      options: PAYABLE_STATUSES.includes(status) ? paymentOptions(total, deposit, paid) : [],
+      options: paymentOptions(total, deposit, paid),
       editable: EDITABLE_STATUSES.includes(status) && paid === 0,
-      isOwner: o.user_id === context.userId,
+      isOwner: o.user_id === context.userId || !!(await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" })).data,
     };
   });
 
@@ -152,9 +152,9 @@ export const startPayment = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ id: z.string().uuid(), kind: z.enum(["total", "sena", "saldo"]) }).parse(d))
   .handler(async ({ data, context }) => {
     const db = await admin();
-    const { data: o } = await db.from("orders").select("*").eq("id", data.id).eq("user_id", context.userId).maybeSingle();
+    const { data: o } = await db.from("orders").select("*").eq("id", data.id).maybeSingle();
     if (!o) throw new Error("Pedido no encontrado");
-    if (!PAYABLE_STATUSES.includes(o.status as OrderStatus)) throw new Error("Este pedido todavía no tiene un presupuesto confirmado");
+    if (o.user_id !== context.userId) await assertAdmin(context);
     const { data: pays } = await db.from("payments").select("status").eq("order_id", o.id).eq("quote_version", o.quote_version);
     if ((pays ?? []).some((p) => ["in_process", "pending", "authorized"].includes(p.status))) throw new Error("Ya hay un pago en proceso para este pedido. Esperá la confirmación de Mercado Pago.");
     const paid = (pays ?? []).filter((p: any) => p.status === "approved").length ? await approvedPaid(o.id, o.quote_version) : 0;
