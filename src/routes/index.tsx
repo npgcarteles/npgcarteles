@@ -245,7 +245,7 @@ function Index() {
       if (revision.current !== startedRevision) throw new Error("La configuración cambió. Generá un montaje nuevo.");
       setResult(URL.createObjectURL(r.blob));
       let blob = r.blob;
-      try { blob = await enhanceSign(r.blob, r.mask, r.face, cfg.iluminacion === "Luz cálida"); } catch { setError("No se pudo aplicar la iluminación con IA; se muestra el montaje base con el tamaño y la ubicación correctos."); }
+      try { blob = await enhanceSign(r.blob, logo, r.mask, r.face, cfg.iluminacion === "Luz cálida"); } catch { setError("No se pudo aplicar la iluminación con IA; se muestra el montaje base con el tamaño y la ubicación correctos."); }
       if (revision.current !== startedRevision) throw new Error("La configuración cambió. Generá un montaje nuevo.");
       setResult(URL.createObjectURL(blob)); setFinal(true);
       const n = usadas + 1;

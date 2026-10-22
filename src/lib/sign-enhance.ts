@@ -17,7 +17,7 @@ async function load(src: Blob | string) {
  * The result is pasted back ONLY inside the mask onto the original-size montage,
  * so the rest of the photo stays pixel-identical and size/position stay fixed.
  */
-export async function enhanceSign(montage: Blob, signMask: Rect, face: { canvas: HTMLCanvasElement; x: number; y: number }, warm: boolean, onPreview?: (url: string) => void) {
+export async function enhanceSign(montage: Blob, logo: Blob, signMask: Rect, face: { canvas: HTMLCanvasElement; x: number; y: number }, warm: boolean, onPreview?: (url: string) => void) {
   const base = await load(montage);
   const W = base.naturalWidth, H = base.naturalHeight;
   const pad = Math.max(8, (signMask.y1 - signMask.y0) * 0.25);
@@ -27,10 +27,11 @@ export async function enhanceSign(montage: Blob, signMask: Rect, face: { canvas:
   mctx.fillStyle = "#000"; mctx.fillRect(0, 0, W, H);
   mctx.clearRect(mask.x0, mask.y0, mask.x1 - mask.x0, mask.y1 - mask.y0);
   const form = new FormData();
-  form.append("image", new File([montage], "montaje.png", { type: "image/png" }));
+  form.append("image[]", new File([montage], "montaje.png", { type: "image/png" }));
+  form.append("image[]", new File([logo], "logo.png", { type: logo.type || "image/png" }));
   form.append("quality", "high");
   form.append("prompt", [
-    "This photo has a flat logo pasted on the facade wall. Keep that logo exactly where it is, same letters, shapes, colors and size.",
+    "Image 1 is a storefront photo with the customer's logo (image 2) already pasted flat on the wall. The sign content MUST be exactly the logo of image 2 — same text, letters, shapes and colors — at exactly the same position and size it has in image 1. Never invent or replace the logo or brand.",
     "Turn that exact logo into a real, professionally built Corpóreo LED sign: 3D channel letters about 5-8 cm deep with returns, opal acrylic faces, standoff mounting, subtle contact shadow on the wall.",
     `The sign is turned on: backlit ${warm ? "warm white (about 3000K)" : "cool white (about 6000K)"} LED glow on the faces and a soft halo on the wall right behind the letters.`,
     "Keep the logo shapes, letters, colors, size, proportions and position exactly the same. Do not add words, frames, panels or boxes. Do not change anything else in the photo; keep the framing, the photo's perspective and lighting.",
