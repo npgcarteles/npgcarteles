@@ -10,12 +10,16 @@ const schema = z.object({
   zone: box,
   doorTopY: z.number().nullable(),
   doorBottomY: z.number().nullable(),
+  doorComplete: z.boolean(),
+  samePlane: z.boolean(),
+  frontal: z.boolean(),
 });
 
 const INSTRUCTIONS = `You analyze a storefront photo for placing a commercial sign. Return normalized coordinates (0..1, origin top-left). Be precise: these coordinates drive a real-size installation.
 zone: the flat wall band where a sign is normally installed — the strip of facade directly above the main entrance/shop window. It must be existing wall: never sky, roof, awning, sidewalk, glass, windows or doors. Span the full usable width of that strip.
-doorTopY/doorBottomY: the FULL vertical extent of the main entrance door including its frame, from the top of the frame to the floor. Estimate the hidden part if it is partially occluded. Only return null when the photo truly shows no entrance door.
-found=false only if there is no reasonable installation band at all.`;
+doorTopY/doorBottomY: the FULL VISIBLE vertical extent of the customer's main entrance door including its frame, from the top of the frame to the floor. Never estimate hidden parts. Return null if not fully visible. This door is assumed to be exactly 2 meters tall. Never use neighboring doors, windows or shutters.
+doorComplete=true ONLY when both floor and upper frame are clearly visible and the entrance is unambiguous. samePlane=true ONLY if that door frame lies in the installation wall plane, not recessed or projecting. frontal=true ONLY for a straight-on facade with parallel horizontal and vertical edges, no meaningful perspective foreshortening. If unsure set false. Angled photographs or recessed doors require a further physical measurement; never invent one.
+zone must be wholly above the entrance and must exclude glass, doors and awnings. Never expand the band just to fit a sign. Existing signage can be replaced within its wall band. found=false if no safe installation band exists.`;
 
 export const Route = createFileRoute("/api/analyze-facade")({
   server: {
@@ -39,15 +43,15 @@ export const Route = createFileRoute("/api/analyze-facade")({
             instructions: INSTRUCTIONS,
             messages: [{ role: "user", content: [{ type: "text", text: "Analyze this storefront." }, { type: "image", image }] }],
             output: Output.object({ schema }),
-            abortSignal: request.signal,
+            maxRetries: 0,
             providerOptions: { openai: { store: false, forceReasoning: true, reasoningEffort: "low", reasoningSummary: "auto", include: ["reasoning.encrypted_content"] } },
           });
           const output = await result.output;
           return Response.json(output);
         } catch (e) {
           const status = (e as { statusCode?: number }).statusCode ?? 502;
-          console.error("analyze-facade", e);
-          return Response.json({ error: "No se pudo analizar la fachada" }, { status });
+          const safe = e instanceof Error ? e.message : "No se pudo analizar la fachada";
+          return Response.json({ error: safe }, { status });
         }
       },
     },
