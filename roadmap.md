@@ -11,3 +11,7 @@
 - [x] Incorporar calibración de superficie, ubicación y aviso para vistas sin referencia real.
 - [x] Guardar la calibración con el diseño e invalidar imágenes cuando cambien las medidas.
 - [x] Probar 1, 2, 3 y 5 m, proporciones, superficie insuficiente y fondo sin regenerar.
+
+# Corrección del simulador
+- [x] Ubicar el cartel en la franja superior con escala según la puerta y verificar que la foto no cambie fuera del cartel.
+- [x] Quitar WhatsApp/Instagram del envío del pedido y confirmar antes de enviar.
