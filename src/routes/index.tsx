@@ -14,10 +14,9 @@ import trAroma from "@/assets/trabajo-panaderia-aroma.png.asset.json";
 import trChipa from "@/assets/trabajo-senor-chipa.png.asset.json";
 import trQueso from "@/assets/trabajo-punto-queso.png.asset.json";
 import npgLogo from "@/assets/npg-logo.png.asset.json";
-import { composeMontage } from "@/lib/montage-compositor";
-import { placementFromAnalysis, type Surface } from "@/lib/montage-geometry";
+import { streamImage } from "@/lib/stream-image";
 import { Button } from "@/components/ui/button";
-import { ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
+import { buildPrompt, ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
 
 const WHATSAPP = "5492975169780";
 
@@ -202,21 +201,12 @@ function SectionTitle({ kicker, title, sub }: { kicker?: string; title: React.Re
   );
 }
 
-async function reducePhoto(file: File) {
-  const bmp = await createImageBitmap(file);
-  const k = Math.min(1, 1400 / Math.max(bmp.width, bmp.height));
-  const c = document.createElement("canvas"); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
-  c.getContext("2d")?.drawImage(bmp, 0, 0, c.width, c.height);
-  return { image: c.toDataURL("image/jpeg", 0.85), w: bmp.width, h: bmp.height };
-}
-
 function Index() {
   const revision = useRef(0);
   const [nombreComercial, setNombreComercial] = useState("");
   const [foto, setFoto] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
   const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "3 m de ancho x 0.6 m de alto", colores: "", iluminacion: ILUMINACION[0] ?? "", notas: "" });
-  const [surface, setSurface] = useState<Surface>({corners:[{x:0.1,y:0.2},{x:0.9,y:0.2},{x:0.9,y:0.8},{x:0.1,y:0.8}],widthM:6,heightM:2,measured:false,center:{x:0.5,y:0.5}});
   const [result, setResult] = useState<string | null>(null);
   const [final, setFinal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -227,7 +217,6 @@ function Index() {
   useEffect(() => { setUsadas(Number(localStorage.getItem("npg-pruebas") || 0)); }, []);
   const restantes = Math.max(0, MAX_PRUEBAS - usadas);
   useEffect(() => { revision.current += 1; setResult(null); setFinal(false); setError(null); }, [foto, logo, cfg]);
-  const [estimada, setEstimada] = useState(true);
   const setMedida = (a: string, h: string) => { setAncho(a); setAlto(h); setCfg((c) => ({ ...c, tamano: `${a} m de ancho x ${h} m de alto` })); };
   const set = (k: keyof SignConfig) => (v: string) => setCfg((c) => ({ ...c, [k]: v }));
 
@@ -237,17 +226,27 @@ function Index() {
     setError(null); setLoading(true); setResult(null); setFinal(false);
     const startedRevision = revision.current;
     try {
-      const { image, w, h } = await reducePhoto(foto);
-      let analysis = null;
-      try { const res = await fetch("/api/analyze-facade", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ image }) }); if (res.ok) analysis = await res.json(); } catch { analysis = null; }
-      const placed = placementFromAnalysis(analysis, w, h, Number(alto));
-      setSurface(placed.surface); setEstimada(placed.estimated);
-      const r = await composeMontage(foto, logo, placed.surface, Number(ancho), Number(alto), cfg.iluminacion === "Luz cálida");
+      const form = new FormData();
+      form.append("image[]", foto);
+      form.append("image[]", logo);
+      const references = await Promise.all([trBocados.url, trChipa.url].map(async (url) => {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("No se pudieron cargar las fotos de referencia de NPG. Probá de nuevo.");
+        return response.blob();
+      }));
+      references.forEach((image, i) => form.append("image[]", image, `trabajo-npg-${i + 1}.png`));
+      form.append("prompt", buildPrompt(cfg));
+      form.append("size", "auto");
+      form.append("quality", "high");
+      await streamImage("/api/edit-image", form, (src, isFinal) => {
+        if (revision.current !== startedRevision) return;
+        setResult(src); setFinal(isFinal);
+      });
       if (revision.current !== startedRevision) throw new Error("La configuración cambió. Generá un montaje nuevo.");
-      setResult(URL.createObjectURL(r.blob)); setFinal(true);
       const n = usadas + 1;
       localStorage.setItem("npg-pruebas", String(n)); setUsadas(n);
     } catch (e) {
+      setResult(null); setFinal(false);
       setError(e instanceof Error ? e.message : "No se pudo generar la simulación.");
     } finally {
       setLoading(false);
@@ -268,7 +267,7 @@ function Index() {
     setSaving(true);
     try {
       const preview = await (await fetch(result)).blob();
-      await saveDraft({ preview, logo, ...(foto ? {originalPhoto: foto} : {}), savedAt: Date.now(), config: { catalogo: "corporeo-led", retiro: "taller-area-51", nombreComercial, montaje: {...surface,method:"planar_homography"}, tipo: cfg.tipo, ancho: Number(ancho), alto: Number(alto), colores: cfg.colores, iluminacion: cfg.iluminacion, notas: cfg.notas } });
+      await saveDraft({ preview, logo, ...(foto ? {originalPhoto: foto} : {}), savedAt: Date.now(), config: { catalogo: "corporeo-led", retiro: "taller-area-51", nombreComercial, tipo: cfg.tipo, ancho: Number(ancho), alto: Number(alto), colores: cfg.colores, iluminacion: cfg.iluminacion, notas: cfg.notas } });
       navigate({ to: "/pedido/nuevo" });
     } catch { setError("No se pudo preparar el pedido. Probá de nuevo."); setSaving(false); }
   }
@@ -368,7 +367,6 @@ function Index() {
                 <img src={result} alt="Simulación del cartel" className={`mt-6 w-full rounded-2xl border border-border transition-[filter] duration-700 ${final ? "blur-0" : "blur-2xl"}`} />
               ) : null}
               {result && <p className="mt-3 text-sm font-semibold">Medida del pedido: {ancho} m × {alto} m · Vista ilustrativa: escala real no verificada</p>}
-              {result && <p className="mt-2 text-xs text-muted-foreground">Tamaño visual ligeramente ampliado para destacar el cartel; no representa una medición real. El logo conserva sus proporciones. El montaje no elimina carteles existentes.</p>}
               <p role="note" className="mt-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-xs leading-5 text-muted-foreground">
                   <strong className="text-foreground">Aviso importante:</strong> Este contenido visual corresponde a una simulación gráfica optimizada. Ha sido generado exclusivamente como una muestra de referencia estética, por lo que no constituye una oferta contractual ni una réplica exacta del entregable final.
               </p>
