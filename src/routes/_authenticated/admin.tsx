@@ -4,7 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { adminGetPricing, adminListOrders, adminSavePricing, adminSetQuote, adminSetStatus, checkAdmin, getOrder } from "@/lib/orders.functions";
-import { formatARS, formatNumero, STATUS_LABEL, type OrderStatus } from "@/lib/orders.shared";
+import { Button } from "@/components/ui/button";
+import { catalogQuote, type OrderConfig, formatARS, formatNumero, STATUS_LABEL, type OrderStatus } from "@/lib/orders.shared";
 
 const adminQ = queryOptions({ queryKey: ["is-admin"], queryFn: () => checkAdmin() });
 
@@ -72,7 +73,7 @@ function Detail({ id }: { id: string }) {
   const [total, setTotal] = useState(""); const [dep, setDep] = useState(""); const [note, setNote] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   if (isLoading || !data) return <p>Cargando…</p>;
-  const o = data.order; const cfg = o.config as Record<string, string | number>; const c = o.contacto as Record<string, string>;
+  const o = data.order; const cfg = o.config as Record<string, string | number>; const fixed = catalogQuote(o.config as OrderConfig); const c = o.contacto as Record<string, string>;
   const refresh = () => { qc.invalidateQueries({ queryKey: ["order", id] }); qc.invalidateQueries({ queryKey: ["admin-orders"] }); };
   const run = async (fn: () => Promise<unknown>) => { setMsg(null); try { await fn(); refresh(); setMsg("Guardado"); } catch (e) { setMsg(e instanceof Error ? e.message : "Error"); } };
   const input = "rounded-xl border border-input bg-muted/60 px-3 py-2";
@@ -85,10 +86,12 @@ function Detail({ id }: { id: string }) {
       <p className="text-sm">Cliente: {c["nombre"]} · {c["telefono"]} · {c["email"]} {c["ciudad"] ?? ""}</p>
       <p className="text-sm">Presupuesto: {o.total_ars != null ? formatARS(o.total_ars) : "—"} {o.deposit_ars ? `(seña ${formatARS(o.deposit_ars)})` : ""} · Pagado verificado: {formatARS(data.paid)}</p>
 
-      <form className="grid gap-2 rounded-2xl border border-border p-4" onSubmit={(e) => { e.preventDefault(); run(() => setQuote({ data: { id, total: Number(total), deposit: dep ? Number(dep) : null, note } })); }}>
+      {fixed && <p className="text-sm">Retiro gratuito en Taller Área 51 · Instalación no incluida{cfg["nombreComercial"] ? ` · Negocio: ${cfg["nombreComercial"]}` : ""}</p>}
+      {fixed && <Button onClick={() => run(() => setQuote({ data: { id, total: fixed.total, deposit: null, note } }))} disabled={data.paid > 0 || o.status !== "esperando_presupuesto"}>Confirmar disponibilidad y habilitar pago</Button>}
+      <form className="grid gap-2 rounded-2xl border border-border p-4" onSubmit={(e) => { e.preventDefault(); run(() => setQuote({ data: { id, total: fixed?.total ?? Number(total), deposit: dep ? Number(dep) : null, note } })); }}>
         <p className="font-semibold">Confirmar / actualizar presupuesto</p>
         <div className="grid gap-2 sm:grid-cols-2">
-          <input required type="number" min="1" step="0.01" placeholder="Total ARS" value={total} onChange={(e) => setTotal(e.target.value)} className={input} />
+          <input required type="number" min="1" step="0.01" placeholder="Total ARS" value={fixed ? String(fixed.total) : total} readOnly={!!fixed} onChange={(e) => setTotal(e.target.value)} className={input} />
           <input type="number" min="1" step="0.01" placeholder="Seña ARS (opcional)" value={dep} onChange={(e) => setDep(e.target.value)} className={input} />
         </div>
         <input placeholder="Nota para el cliente (incluye, plazos, etc.)" value={note} onChange={(e) => setNote(e.target.value)} className={input} />
@@ -120,7 +123,8 @@ function Pricing() {
   if (!data) return null;
   return (
     <div className="mt-6 rounded-2xl border border-border bg-card p-4">
-      <button onClick={() => setOpen(!open)} className="text-sm font-semibold">Precios: {data.auto_enabled ? "presupuesto automático activo" : "presupuesto manual (NPG confirma cada pedido)"} ▾</button>
+      <p className="mb-3 text-sm">El catálogo tiene precios fijos por medida y retiro gratuito. Esta configuración corresponde a otros presupuestos.</p>
+      <button onClick={() => setOpen(!open)} className="text-sm font-semibold">Otros presupuestos: {data.auto_enabled ? "presupuesto automático activo" : "presupuesto manual (NPG confirma cada pedido)"} ▾</button>
       {open && (
         <form className="mt-3 grid gap-2 sm:grid-cols-4" onSubmit={async (e) => {
           e.preventDefault(); const f = new FormData(e.currentTarget); const n = (k: string) => (f.get(k) ? Number(f.get(k)) : null);
