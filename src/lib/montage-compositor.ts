@@ -8,7 +8,7 @@ async function load(blob: Blob) {
 function canvas(w: number, h: number) { const c = document.createElement("canvas"); c.width = w; c.height = h; const ctx = c.getContext("2d"); if (!ctx) throw new Error("Tu navegador no permite componer imágenes."); return { c, ctx }; }
 
 /** Bilinear sample of the sign layer at fractional coordinates; transparent outside. */
-function sample(src: ImageData, x: number, y: number, out: number[], o: number) {
+function sample(src: ImageData, x: number, y: number, out: Uint8ClampedArray, o: number) {
   const fx = x - 0.5, fy = y - 0.5;
   const xa = Math.floor(fx), ya = Math.floor(fy);
   const tx = fx - xa, ty = fy - ya;
