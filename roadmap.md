@@ -24,6 +24,8 @@
 - [x] Probar 1, 2, 3 y 5 m, proporciones, superficie insuficiente y fondo sin regenerar.
 
 # Corrección del simulador
+- [x] Aplicar puerta de 2 metros en fotos frontales del mismo plano, bloquear referencias insuficientes y superficies donde no cabe; 47 pruebas, bloqueo con foto real, composición de 400 píxeles y edición de IA real con calibración controlada comprobados sin alterar precios.
+- [ ] Verificar generación completa con una foto real frontal cuya puerta y pared estén en el mismo plano: la foto disponible es inclinada y se rechaza correctamente. Fotos inclinadas requieren una referencia física adicional para rectificación métrica; no se inventa perspectiva.
 - [x] Restaurar edición completa por IA con cartel protagonista como los trabajos, conservar luz elegida y medidas/precios del pedido; generación final de 4 Metros verificada en navegador y 18 pruebas aprobadas.
 - [x] Ubicar el cartel en la franja superior con escala según la puerta y verificar que la foto no cambie fuera del cartel.
 - [x] Quitar WhatsApp/Instagram del envío del pedido y confirmar antes de enviar.

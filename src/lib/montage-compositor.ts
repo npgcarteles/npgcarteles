@@ -1,4 +1,4 @@
-import { dimensions, fitLogo, homography, project, signProjection, previewDimensions, type Surface } from "./montage-geometry";
+import { dimensions, fitLogo, homography, project, signProjection, type Surface } from "./montage-geometry";
 
 async function load(blob: Blob) {
   const url = URL.createObjectURL(blob);
@@ -25,7 +25,7 @@ function sample(src: ImageData, x: number, y: number, out: Uint8ClampedArray, o:
 // Deterministic composition: the original photo is never sent to a generative model.
 export async function composeMontage(photo: Blob, logo: Blob, surface: Surface, widthM: number, heightM: number, warm: boolean) {
   const d = dimensions(widthM, heightM);
-  const corners = signProjection(surface, previewDimensions(surface, d));
+  const corners = signProjection(surface, d);
   const [bg, mark] = await Promise.all([load(photo), load(logo)]);
   const { c, ctx } = canvas(bg.naturalWidth, bg.naturalHeight);
   ctx.drawImage(bg, 0, 0);
@@ -34,7 +34,7 @@ export async function composeMontage(photo: Blob, logo: Blob, surface: Surface, 
   const lw = Math.min(2400, Math.max(700, Math.round(d.widthM * 500)));
   const lh = Math.round(lw / d.aspectRatio);
   const layer = canvas(lw, lh);
-  const pad = Math.round(lh * 0.04);
+  const pad = 0;
   const fitted = fitLogo(mark.naturalWidth, mark.naturalHeight, lw - pad * 2, lh - pad * 2);
   layer.ctx.drawImage(mark, pad + fitted.x, pad + fitted.y, fitted.width, fitted.height);
   // Opal acrylic face: soft emissive tint over the logo pixels only.
@@ -91,4 +91,25 @@ export function verifyUntouched(a: ImageData, b: ImageData, m: { x0: number; y0:
     if (a.data[i] !== b.data[i] || a.data[i + 1] !== b.data[i + 1] || a.data[i + 2] !== b.data[i + 2] || a.data[i + 3] !== b.data[i + 3]) return false;
   }
   return true;
+}
+
+/** Editing may enhance the local wall/light only. Reapply the calibrated face at its exact original coordinates. */
+export async function prepareScaledEdit(photo: Blob, logo: Blob, surface: Surface, widthM: number, heightM: number, warm: boolean) {
+  const montage = await composeMontage(photo,logo,surface,widthM,heightM,warm);
+  const bg = await load(montage.blob);
+  const { c,ctx }=canvas(bg.naturalWidth,bg.naturalHeight);
+  ctx.fillRect(0,0,c.width,c.height);
+  const m=montage.mask;
+  ctx.clearRect(m.x0,m.y0,m.x1-m.x0,m.y1-m.y0);
+  const mask=await new Promise<Blob>((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(new Error("No se pudo preparar la máscara.")),"image/png"));
+  return { ...montage, maskBlob:mask, finish:async (src:string) => {
+    const rendered=await load(await (await fetch(src)).blob());
+    const output=canvas(bg.naturalWidth,bg.naturalHeight);
+    output.ctx.drawImage(bg,0,0);
+    output.ctx.save(); output.ctx.beginPath(); output.ctx.rect(m.x0,m.y0,m.x1-m.x0,m.y1-m.y0); output.ctx.clip();
+    output.ctx.drawImage(rendered,0,0,output.c.width,output.c.height);
+    output.ctx.drawImage(montage.face.canvas,montage.face.x,montage.face.y);
+    output.ctx.restore();
+    return output.c.toDataURL("image/png");
+  }};
 }
