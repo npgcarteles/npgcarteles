@@ -27,8 +27,8 @@ export async function enhanceSign(montage: Blob, logo: Blob, signMask: Rect, fac
   mctx.fillStyle = "#000"; mctx.fillRect(0, 0, W, H);
   mctx.clearRect(mask.x0, mask.y0, mask.x1 - mask.x0, mask.y1 - mask.y0);
   const form = new FormData();
-  form.append("image", new File([montage], "montaje.png", { type: "image/png" }));
-  form.append("image", new File([logo], "logo.png", { type: logo.type || "image/png" }));
+  form.append("image[]", new File([montage], "montaje.png", { type: "image/png" }));
+  form.append("image[]", new File([logo], "logo.png", { type: logo.type || "image/png" }));
   form.append("quality", "high");
   form.append("prompt", [
     "Image 1 is a storefront photo with the customer's logo (image 2) already pasted flat on the wall. The sign content MUST be exactly the logo of image 2 — same text, letters, shapes and colors — at exactly the same position and size it has in image 1. Never invent or replace the logo or brand.",
