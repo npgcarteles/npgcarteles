@@ -12,10 +12,10 @@ const schema = z.object({
   doorBottomY: z.number().nullable(),
 });
 
-const INSTRUCTIONS = `You analyze a storefront photo for placing a sign. Return normalized coordinates (0..1, origin top-left).
-zone: the flat wall band where a commercial sign is normally installed — above the main entrance/shop window, on the upper strip of the facade. It must be existing wall, not sky, roof, sidewalk, windows or doors.
-doorTopY/doorBottomY: vertical extent of the main entrance door (null if no door is visible).
-found=false if there is no reasonable installation band.`;
+const INSTRUCTIONS = `You analyze a storefront photo for placing a commercial sign. Return normalized coordinates (0..1, origin top-left). Be precise: these coordinates drive a real-size installation.
+zone: the flat wall band where a sign is normally installed — the strip of facade directly above the main entrance/shop window. It must be existing wall: never sky, roof, awning, sidewalk, glass, windows or doors. Span the full usable width of that strip.
+doorTopY/doorBottomY: the FULL vertical extent of the main entrance door including its frame, from the top of the frame to the floor. Estimate the hidden part if it is partially occluded. Only return null when the photo truly shows no entrance door.
+found=false only if there is no reasonable installation band at all.`;
 
 export const Route = createFileRoute("/api/analyze-facade")({
   server: {

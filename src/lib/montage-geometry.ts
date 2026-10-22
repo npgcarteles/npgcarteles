@@ -44,21 +44,34 @@ export const DOOR_HEIGHT_M = 2.1;
 const DEFAULT_ZONE = { x0: 0.1, y0: 0.1, x1: 0.9, y1: 0.32 };
 const DEFAULT_ZONE_WIDTH_M = 6;
 
-/** Builds the installation surface from a validated facade analysis; falls back to a prudent upper band. */
+/** Builds the installation surface from a validated facade analysis; the sign band is always anchored above the entrance door when one is detected. */
 export function placementFromAnalysis(a: FacadeAnalysis | null, imgW: number, imgH: number, signHeightM: number): { surface: Surface; estimated: boolean } {
   const ok = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v) && v >= 0 && v <= 1;
   const z = a?.zone;
   const zoneValid = !!a?.found && !!z && [z.x0, z.y0, z.x1, z.y1].every(ok) && z.x1 - z.x0 >= 0.15 && z.y1 > z.y0 && (z.y0 + z.y1) / 2 <= 0.6;
-  const zone = zoneValid && z ? z : DEFAULT_ZONE;
-  const door = a && ok(a.doorTopY) && ok(a.doorBottomY) && a.doorBottomY - a.doorTopY >= 0.15 ? (a.doorBottomY - a.doorTopY) * imgH : null;
-  const pxPerM = zoneValid && door ? door / DOOR_HEIGHT_M : ((zone.x1 - zone.x0) * imgW) / DEFAULT_ZONE_WIDTH_M;
-  const widthM = ((zone.x1 - zone.x0) * imgW) / pxPerM;
-  let y0 = zone.y0, y1 = zone.y1;
+  const doorTop = a && ok(a.doorTopY) ? a.doorTopY : null;
+  const doorPx = a && doorTop !== null && ok(a.doorBottomY) && a.doorBottomY - doorTop >= 0.12 && a.doorBottomY <= 1 ? (a.doorBottomY - doorTop) * imgH : null;
+  const base = zoneValid && z ? z : DEFAULT_ZONE;
+  // Real scale comes from the door (2.1 m); without a door the size is an estimate.
+  const pxPerM = doorPx ? doorPx / DOOR_HEIGHT_M : ((base.x1 - base.x0) * imgW) / DEFAULT_ZONE_WIDTH_M;
   const needH = (signHeightM * pxPerM) / imgH;
-  if (y1 - y0 < needH) { const c = (y0 + y1) / 2; y0 = Math.max(0, c - needH / 2); y1 = Math.min(1, y0 + needH); y0 = Math.max(0, y1 - needH); }
+  let x0 = base.x0, x1 = base.x1, y0 = base.y0, y1 = base.y1;
+  if (doorTop !== null) {
+    // The sign band must end just above the door, never overlapping it.
+    y1 = Math.min(y1, doorTop - 0.02);
+    if (!zoneValid || y1 - y0 < needH) {
+      // Rebuild the band directly above the door with room for the sign.
+      if (!zoneValid) { x0 = 0.1; x1 = 0.9; }
+      y0 = Math.max(0, y1 - Math.max(needH, 0.08));
+    }
+    if (y1 - y0 < 0.04) { y0 = Math.max(0, y1 - Math.max(needH, 0.1)); }
+  } else if (y1 - y0 < needH) {
+    const c = (y0 + y1) / 2; y0 = Math.max(0, c - needH / 2); y1 = Math.min(1, y0 + needH); y0 = Math.max(0, y1 - needH);
+  }
+  const widthM = ((x1 - x0) * imgW) / pxPerM;
   const heightM = ((y1 - y0) * imgH) / pxPerM;
   return {
-    estimated: !(zoneValid && door),
-    surface: { corners: [{ x: zone.x0, y: y0 }, { x: zone.x1, y: y0 }, { x: zone.x1, y: y1 }, { x: zone.x0, y: y1 }], widthM, heightM: Math.max(heightM, signHeightM), measured: false, center: { x: 0.5, y: 0.5 } },
+    estimated: !(zoneValid && doorPx),
+    surface: { corners: [{ x: x0, y: y0 }, { x: x1, y: y0 }, { x: x1, y: y1 }, { x: x0, y: y1 }], widthM, heightM: Math.max(heightM, signHeightM), measured: false, center: { x: 0.5, y: 0.5 } },
   };
 }
