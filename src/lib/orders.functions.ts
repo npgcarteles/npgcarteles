@@ -3,7 +3,7 @@ import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
-  calcAutoQuote, catalogQuote, EDITABLE_STATUSES, formatNumero, PAYABLE_STATUSES, paymentOptions,
+  calcAutoQuote, catalogQuote, EDITABLE_STATUSES, formatNumero, paymentOptions,
   type OrderStatus, type PricingSettings,
 } from "./orders.shared";
 
