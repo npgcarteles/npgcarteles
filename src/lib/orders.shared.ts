@@ -14,8 +14,8 @@ export type OrderConfig = {
   iluminacion: string;
   notas: string;
   nombreComercial?: string;
-  catalogo?: "corporeo-led";
-  retiro?: "taller-area-51";
+  catalogo?: "corporeo-led" | undefined;
+  retiro?: "taller-area-51" | undefined;
   solicitudId?: string;
   montaje?: { corners: {x: number; y: number}[]; widthM: number; heightM: number; measured: boolean; center: {x: number; y: number}; method: "planar_homography" };
 };
