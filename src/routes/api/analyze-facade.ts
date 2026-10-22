@@ -41,7 +41,7 @@ export const Route = createFileRoute("/api/analyze-facade")({
             output: Output.object({ schema }),
             abortSignal: request.signal,
             providerOptions: { openai: { store: false, forceReasoning: true, reasoningEffort: "low", reasoningSummary: "auto", include: ["reasoning.encrypted_content"] } },
-          } as Parameters<typeof streamText>[0]);
+          });
           const output = await result.output;
           return Response.json(output);
         } catch (e) {
