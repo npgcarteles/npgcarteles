@@ -32,7 +32,7 @@ type Props = {
   error: string | null;
   quoteNote: string | null;
   onKind: (kind: PaymentKind) => void;
-  onPay: () => void;
+  const canPay = isOwner && !busy;
 };
 
 export function OrderCheckout({ total, paid, options, selected, isOwner, busy, error, quoteNote, onKind, onPay }: Props) {
@@ -61,7 +61,6 @@ export function OrderCheckout({ total, paid, options, selected, isOwner, busy, e
         )}
 
         <h2 className="mb-2 mt-9 text-xl font-bold">Método de pago</h2>
-        <RadioGroup aria-label="Método de pago" value={method} onValueChange={chooseMethod} className="gap-0">
           <PaymentRow value="mp" disabled={!canPay} title="MERCADO PAGO" note="Tarjetas y medios disponibles en el checkout seguro de Mercado Pago" />
         </RadioGroup>
 
