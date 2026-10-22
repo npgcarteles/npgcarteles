@@ -12,7 +12,7 @@ import { formatARS, STATUS_LABEL, STATUS_MESSAGE, type OrderConfig, type Payment
 const ANCHOS = [2, 3, 4, 5];
 const ALTO: Record<number, number> = { 2: 0.5, 3: 0.6, 4: 0.8, 5: 1 };
 
-const orderQuery = (id: string) => queryOptions({ queryKey: ["order", id], queryFn: () => getOrder({ data: { id } }) });
+const orderQuery = (id: string) => queryOptions({ queryKey: ["order", id], queryFn: () => getOrder({ data: { id } }), refetchInterval: 15000 });
 
 export const Route = createFileRoute("/_authenticated/pedidos/$id")({
   validateSearch: (s: Record<string, unknown>): { payment_id?: string | undefined } => ({
@@ -57,7 +57,8 @@ function PedidoDetalle() {
     if (!payment_id || did.current) return;
     did.current = true;
     sync({ data: { id, paymentId: payment_id } })
-      .catch(() => null)
+      .then((result) => { if (!result.ok) setErr("Mercado Pago todavía no confirmó este pago. No se marcó como pagado."); })
+      .catch(() => setErr("No pudimos verificar el pago con Mercado Pago. No se marcó como pagado; revisá el estado más tarde."))
       .finally(async () => {
         await qc.invalidateQueries({ queryKey: ["order", id] });
         setVerifying(false);
@@ -128,6 +129,7 @@ function EditDesign({ id, cfg, onDone }: { id: string; cfg: OrderConfig; onDone:
   const [v, setV] = useState(cfg);
   const [busy, setBusy] = useState(false);
   const save = useServerFn(updateOrderDesign);
+  const [error, setError] = useState<string | null>(null);
   const qc = useQueryClient();
   const chip = (on: boolean) => `rounded-full border px-3 py-1.5 text-sm ${on ? "border-primary bg-accent" : "border-border"}`;
   return (
@@ -136,10 +138,11 @@ function EditDesign({ id, cfg, onDone }: { id: string; cfg: OrderConfig; onDone:
       <input value={v.colores} maxLength={200} onChange={(e) => setV({ ...v, colores: e.target.value })} placeholder="Colores" className="rounded-xl border border-input bg-muted/60 px-4 py-3" />
       <input value={v.notas} maxLength={500} onChange={(e) => setV({ ...v, notas: e.target.value })} placeholder="Observaciones" className="rounded-xl border border-input bg-muted/60 px-4 py-3" />
       <div className="flex gap-3">
-        <Button disabled={busy} onClick={async () => { setBusy(true); await save({ data: { id, config: v } }); await qc.invalidateQueries({ queryKey: ["order", id] }); onDone(); }}
+        <Button disabled={busy} onClick={async () => { setBusy(true); setError(null); try { await save({ data: { id, config: v } }); await qc.invalidateQueries({ queryKey: ["order", id] }); onDone(); } catch (e) { setError(e instanceof Error ? e.message : "No se pudieron guardar los cambios."); } finally { setBusy(false); } }}
           className="rounded-none shadow-none">Guardar cambios</Button>
-        <Button variant="ghost" onClick={onDone}>Cancelar</Button>
+        <Button disabled={busy} variant="ghost" onClick={onDone}>Cancelar</Button>
       </div>
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }
