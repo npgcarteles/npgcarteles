@@ -15,7 +15,6 @@ import trChipa from "@/assets/trabajo-senor-chipa.png.asset.json";
 import trQueso from "@/assets/trabajo-punto-queso.png.asset.json";
 import npgLogo from "@/assets/npg-logo.png.asset.json";
 import { composeMontage } from "@/lib/montage-compositor";
-import { enhanceSign } from "@/lib/sign-enhance";
 import { placementFromAnalysis, type Surface } from "@/lib/montage-geometry";
 import { Button } from "@/components/ui/button";
 import { ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
