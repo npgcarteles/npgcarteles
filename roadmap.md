@@ -1,8 +1,9 @@
 # Tienda NPG
-- [ ] Incorporar catálogo con cuatro precios exactos y conservar personalización y simulación.
-- [ ] Guardar precio autorizado y retiro gratuito; confirmar disponibilidad sin simular pagos ni duplicar pedidos.
-- [ ] Mostrar instalación separada y enlace oficial del taller en catálogo, resumen y pedido.
-- [ ] Probar precios, compra real registrada y presentación móvil/escritorio.
+- [x] Incorporar catálogo con cuatro precios exactos y conservar personalización y simulación.
+- [x] Guardar precio autorizado y retiro gratuito; confirmar disponibilidad sin simular pagos ni duplicar pedidos.
+- [x] Mostrar instalación separada y enlace oficial del taller en catálogo, resumen y pedido.
+- [x] Probar los cuatro precios, solicitud registrada y leída, reintento sin duplicados y presentación móvil/escritorio.
+- [ ] Verificar aprobación administrativa y apertura de Mercado Pago para el catálogo: la sesión disponible es de cliente, sin permisos administrativos; requiere aprobación de NPG.
 
 # Checkout NPG
 - [x] Agregar envío manual del pedido por WhatsApp y resumen para Instagram; verificar destinos y presupuesto pendiente con tres pruebas.
