@@ -24,6 +24,7 @@
 - [x] Probar 1, 2, 3 y 5 m, proporciones, superficie insuficiente y fondo sin regenerar.
 
 # Corrección del simulador
+- [ ] Restaurar edición completa por IA con cartel protagonista como los trabajos, conservar luz elegida y medidas/precios del pedido, verificar generación real.
 - [x] Ubicar el cartel en la franja superior con escala según la puerta y verificar que la foto no cambie fuera del cartel.
 - [x] Quitar WhatsApp/Instagram del envío del pedido y confirmar antes de enviar.
 - [x] Cartel iluminado realista como 'Nuestros trabajos', a escala real y en su lugar.
