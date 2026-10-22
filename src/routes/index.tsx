@@ -466,3 +466,7 @@ function Index() {
     </main>
   );
 }
+/* Ocultar badge Lovable */
+#lovable-badge, a[href*="lovable.dev"], a[href*="lovable.app"] {
+  display: none !important;
+}
