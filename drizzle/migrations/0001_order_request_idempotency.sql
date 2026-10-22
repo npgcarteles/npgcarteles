@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS orders_user_solicitud_id_unique ON public.orders (user_id, (config->>'solicitudId')) WHERE config->>'solicitudId' IS NOT NULL;
