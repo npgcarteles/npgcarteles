@@ -14,7 +14,7 @@ import trChipa from "@/assets/trabajo-senor-chipa.png.asset.json";
 import trQueso from "@/assets/trabajo-punto-queso.png.asset.json";
 import npgLogo from "@/assets/npg-logo.png.asset.json";
 import { composeMontage } from "@/lib/montage-compositor";
-import type { Surface } from "@/lib/montage-geometry";
+import { placementFromAnalysis, type Surface } from "@/lib/montage-geometry";
 import { Button } from "@/components/ui/button";
 import { ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
 
@@ -201,12 +201,20 @@ function SectionTitle({ kicker, title, sub }: { kicker?: string; title: React.Re
   );
 }
 
+async function reducePhoto(file: File) {
+  const bmp = await createImageBitmap(file);
+  const k = Math.min(1, 1024 / Math.max(bmp.width, bmp.height));
+  const c = document.createElement("canvas"); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  c.getContext("2d")?.drawImage(bmp, 0, 0, c.width, c.height);
+  return { image: c.toDataURL("image/jpeg", 0.85), w: bmp.width, h: bmp.height };
+}
+
 function Index() {
   const revision = useRef(0);
   const [foto, setFoto] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
   const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "3 m de ancho x 0.6 m de alto", colores: "", iluminacion: ILUMINACION[0] ?? "", notas: "" });
-  const [surface] = useState<Surface>({corners:[{x:0.1,y:0.2},{x:0.9,y:0.2},{x:0.9,y:0.8},{x:0.1,y:0.8}],widthM:6,heightM:2,measured:false,center:{x:0.5,y:0.5}});
+  const [surface, setSurface] = useState<Surface>({corners:[{x:0.1,y:0.2},{x:0.9,y:0.2},{x:0.9,y:0.8},{x:0.1,y:0.8}],widthM:6,heightM:2,measured:false,center:{x:0.5,y:0.5}});
   const [result, setResult] = useState<string | null>(null);
   const [final, setFinal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -216,7 +224,8 @@ function Index() {
   const [usadas, setUsadas] = useState(0);
   useEffect(() => { setUsadas(Number(localStorage.getItem("npg-pruebas") || 0)); }, []);
   const restantes = Math.max(0, MAX_PRUEBAS - usadas);
-  useEffect(() => { revision.current += 1; setResult(null); setFinal(false); setError(null); }, [foto, logo, cfg, surface]);
+  useEffect(() => { revision.current += 1; setResult(null); setFinal(false); setError(null); }, [foto, logo, cfg]);
+  const [estimada, setEstimada] = useState(true);
   const setMedida = (a: string, h: string) => { setAncho(a); setAlto(h); setCfg((c) => ({ ...c, tamano: `${a} m de ancho x ${h} m de alto` })); };
   const set = (k: keyof SignConfig) => (v: string) => setCfg((c) => ({ ...c, [k]: v }));
 
@@ -226,7 +235,12 @@ function Index() {
     setError(null); setLoading(true); setResult(null); setFinal(false);
     const startedRevision = revision.current;
     try {
-      const r = await composeMontage(foto, logo, surface, Number(ancho), Number(alto), cfg.iluminacion === "Luz cálida");
+      const { image, w, h } = await reducePhoto(foto);
+      let analysis = null;
+      try { const res = await fetch("/api/analyze-facade", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ image }) }); if (res.ok) analysis = await res.json(); } catch { analysis = null; }
+      const placed = placementFromAnalysis(analysis, w, h, Number(alto));
+      setSurface(placed.surface); setEstimada(placed.estimated);
+      const r = await composeMontage(foto, logo, placed.surface, Number(ancho), Number(alto), cfg.iluminacion === "Luz cálida");
       if (revision.current !== startedRevision) throw new Error("La configuración cambió. Generá un montaje nuevo.");
       setResult(URL.createObjectURL(r.blob)); setFinal(true);
       const n = usadas + 1;
@@ -350,7 +364,7 @@ function Index() {
               {result ? (
                 <img src={result} alt="Simulación del cartel" className={`mt-6 w-full rounded-2xl border border-border transition-[filter] duration-700 ${final ? "blur-0" : "blur-2xl"}`} />
               ) : null}
-              {result && <p className="mt-3 text-sm font-semibold">{ancho} m × {alto} m · {surface.measured ? "Escala calibrada con referencia declarada por el cliente" : "Vista ilustrativa: escala real no verificada"}</p>}
+              {result && <p className="mt-3 text-sm font-semibold">{ancho} m × {alto} m · {estimada ? "Vista ilustrativa: no se detectó una puerta de referencia, ubicación y escala aproximadas" : "Escala estimada a partir de la puerta del local (≈2,1 m); no es una medición profesional"}</p>}
               {result && <p className="mt-2 text-xs text-muted-foreground">El logo conserva sus proporciones dentro de estas medidas; puede dejar espacio libre. El montaje no elimina carteles existentes ni reproduce materiales y volumen de fabricación.</p>}
               <p role="note" className="mt-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-xs leading-5 text-muted-foreground">
                   <strong className="text-foreground">Aviso importante:</strong> Este contenido visual corresponde a una simulación gráfica optimizada. Ha sido generado exclusivamente como una muestra de referencia estética, por lo que no constituye una oferta contractual ni una réplica exacta del entregable final.

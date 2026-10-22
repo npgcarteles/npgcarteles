@@ -94,8 +94,9 @@ function NuevoPedido() {
               <input required minLength={6} maxLength={30} placeholder="Teléfono / WhatsApp" value={c.telefono} onChange={f("telefono")} className={input} />
               <input maxLength={100} placeholder="Ciudad (opcional)" value={c.ciudad} onChange={f("ciudad")} className={input} />
               <p className="text-xs text-muted-foreground">NPG revisa tu diseño y confirma el presupuesto. Recién ahí se habilita el pago.</p>
+              <label className="flex items-start gap-2 text-sm"><input type="checkbox" required className="mt-1" /> Revisé la simulación, el tipo de cartel, las medidas y la iluminación.</label>
               <button disabled={busy} className="flex items-center justify-center gap-2 rounded-full bg-gradient-brand py-4 font-display text-sm text-primary-foreground shadow-glow disabled:opacity-60">
-                {busy && <Loader2 className="h-4 w-4 animate-spin" />} CONFIRMAR PEDIDO
+                {busy && <Loader2 className="h-4 w-4 animate-spin" />} ENVIAR PEDIDO
               </button>
               {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
             </aside>

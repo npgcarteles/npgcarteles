@@ -10,9 +10,9 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
-- Manual order sharing lives in a browser-only presentation component with pure summary helpers; it uses saved order values, never changes order/payment states, and never includes temporary private image URLs in external messages.
+- Orders are sent only through the internal order system (no WhatsApp/Instagram order sharing) so every request is persisted before confirmation.
 - Order prices, statuses and payment amounts are computed and written only in server functions (`src/lib/orders.functions.ts`) with the admin client; clients only have SELECT RLS, so the browser can never set price or "approved".
 - Payments use Mercado Pago Checkout Pro; a payment counts only after the server re-reads it from MP's API (webhook with signature check or return-page sync), keyed by `payments.id` as external_reference.
 - Pure pricing/payment/status rules live in `src/lib/orders.shared.ts` with tests next to it.
 - The order checkout presentation lives in `src/components/order-checkout.tsx` with scoped semantic tokens; it consumes server-confirmed amounts and calls the existing payment function, never the notification webhook, to avoid changing payment authority.
-- Storefront previews use a deterministic browser canvas compositor and an ml-matrix planar homography; without calibration controls, a fixed illustrative surface is explicitly unmeasured so no real-scale claim is made. Generative AI never redraws the facade or final sign geometry. Surface metadata accompanies the draft/order; source photos stay in the local draft. Design changes invalidate previews to prevent stale geometry being paired with new quotes.
+- Storefront previews use a deterministic browser canvas compositor and an ml-matrix planar homography; placement comes from a read-only AI facade analysis (install band, door height as 2.1 m scale) with a prudent upper-band fallback, and pixels outside the sign mask are verified identical to the original. Generative AI never redraws the facade or final sign geometry. Surface metadata accompanies the draft/order; source photos stay in the local draft. Design changes invalidate previews to prevent stale geometry being paired with new quotes.

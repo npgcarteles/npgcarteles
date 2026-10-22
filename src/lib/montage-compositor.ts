@@ -34,8 +34,28 @@ export async function composeMontage(photo: Blob, logo: Blob, surface: Surface, 
   warped.ctx.putImageData(out,0,0);
   // Effects do not scale or redraw the source logo; only a bounded halo/contact shadow.
   const tokens=getComputedStyle(document.documentElement);
-  ctx.save(); ctx.shadowColor=tokens.getPropertyValue(warm ? "--sign-halo-warm" : "--sign-halo-white").trim(); ctx.shadowBlur=Math.max(2,Math.min(12,(x1-x0)*0.02)); ctx.drawImage(warped.c,x0,y0); ctx.restore();
+  const blur=Math.max(2,Math.min(12,(x1-x0)*0.02)), depth=Math.max(1,Math.round((y1-y0)*0.04));
+  const margin=Math.ceil(blur*3+depth+4);
+  const mask={x0:Math.max(0,x0-margin),y0:Math.max(0,y0-margin),x1:Math.min(c.width,x1+margin),y1:Math.min(c.height,y1+margin)};
+  const original=ctx.getImageData(0,0,c.width,c.height);
+  ctx.save(); ctx.beginPath(); ctx.rect(mask.x0,mask.y0,mask.x1-mask.x0,mask.y1-mask.y0); ctx.clip();
+  // Contact shadow + letter depth (stacked darkened copies) + LED halo, all clipped to the sign mask.
+  ctx.save(); ctx.filter="brightness(0.25)"; ctx.globalAlpha=0.35; ctx.shadowColor="rgba(0,0,0,0.6)"; ctx.shadowBlur=blur*0.6; ctx.shadowOffsetY=depth; ctx.drawImage(warped.c,x0+depth*0.5,y0+depth); ctx.restore();
+  ctx.save(); ctx.filter="brightness(0.55)"; for(let i=depth;i>0;i--) ctx.drawImage(warped.c,x0+i*0.3,y0+i*0.6); ctx.restore();
+  ctx.save(); ctx.shadowColor=tokens.getPropertyValue(warm ? "--sign-halo-warm" : "--sign-halo-white").trim(); ctx.shadowBlur=blur; ctx.drawImage(warped.c,x0,y0); ctx.restore();
   ctx.drawImage(warped.c,x0,y0);
+  ctx.restore();
+  if(!verifyUntouched(original,ctx.getImageData(0,0,c.width,c.height),mask)) throw new Error("La simulación modificó zonas de la foto fuera del cartel. Probá de nuevo.");
   const blob=await new Promise<Blob>((resolve,reject)=>c.toBlob((b)=>b?resolve(b):reject(new Error("No se pudo exportar el montaje.")),"image/png"));
-  return {blob,corners,dimensions:d};
+  return {blob,corners,dimensions:d,mask};
+}
+/** True when every pixel outside the mask is identical to the original photo. */
+export function verifyUntouched(a: ImageData, b: ImageData, m: {x0:number;y0:number;x1:number;y1:number}) {
+  if (a.width!==b.width||a.height!==b.height) return false;
+  for (let y=0;y<a.height;y++) for (let x=0;x<a.width;x++) {
+    if (x>=m.x0&&x<m.x1&&y>=m.y0&&y<m.y1) continue;
+    const i=(y*a.width+x)*4;
+    if (a.data[i]!==b.data[i]||a.data[i+1]!==b.data[i+1]||a.data[i+2]!==b.data[i+2]||a.data[i+3]!==b.data[i+3]) return false;
+  }
+  return true;
 }

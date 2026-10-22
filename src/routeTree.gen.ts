@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ApiAnalyzeFacadeRouteImport } from './routes/api/analyze-facade'
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
 import { Route as AuthenticatedPedidoNuevoRouteImport } from './routes/_authenticated/pedido.nuevo'
 import { Route as AuthenticatedPedidosIndexRouteImport } from './routes/_authenticated/pedidos.index'
@@ -37,6 +38,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiAnalyzeFacadeRoute = ApiAnalyzeFacadeRouteImport.update({
+  id: '/api/analyze-facade',
+  path: '/api/analyze-facade',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiEditImageRoute = ApiEditImageRouteImport.update({
   id: '/api/edit-image',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/api/analyze-facade': typeof ApiAnalyzeFacadeRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/pedido/nuevo': typeof AuthenticatedPedidoNuevoRoute
   '/pedidos/$id': typeof AuthenticatedPedidosIdRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/api/analyze-facade': typeof ApiAnalyzeFacadeRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/pedido/nuevo': typeof AuthenticatedPedidoNuevoRoute
   '/pedidos/$id': typeof AuthenticatedPedidosIdRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/api/analyze-facade': typeof ApiAnalyzeFacadeRoute
   '/api/edit-image': typeof ApiEditImageRoute
   '/_authenticated/pedido/nuevo': typeof AuthenticatedPedidoNuevoRoute
   '/_authenticated/pedidos/$id': typeof AuthenticatedPedidosIdRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/admin'
+    | '/api/analyze-facade'
     | '/api/edit-image'
     | '/pedido/nuevo'
     | '/pedidos/$id'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/admin'
+    | '/api/analyze-facade'
     | '/api/edit-image'
     | '/pedido/nuevo'
     | '/pedidos/$id'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/admin'
+    | '/api/analyze-facade'
     | '/api/edit-image'
     | '/_authenticated/pedido/nuevo'
     | '/_authenticated/pedidos/$id'
@@ -137,6 +149,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiAnalyzeFacadeRoute: typeof ApiAnalyzeFacadeRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
   ApiPublicMercadopagoWebhookRoute: typeof ApiPublicMercadopagoWebhookRoute
 }
@@ -170,6 +183,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/analyze-facade': {
+      id: '/api/analyze-facade'
+      path: '/api/analyze-facade'
+      fullPath: '/api/analyze-facade'
+      preLoaderRoute: typeof ApiAnalyzeFacadeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/edit-image': {
       id: '/api/edit-image'
@@ -230,6 +250,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiAnalyzeFacadeRoute: ApiAnalyzeFacadeRoute,
   ApiEditImageRoute: ApiEditImageRoute,
   ApiPublicMercadopagoWebhookRoute: ApiPublicMercadopagoWebhookRoute,
 }

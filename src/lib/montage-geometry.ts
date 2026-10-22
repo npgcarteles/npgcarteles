@@ -39,3 +39,26 @@ export function fitLogo(w: number, h: number, boxW: number, boxH: number) {
   const scale = Math.min(boxW/w,boxH/h);
   return { width:w*scale,height:h*scale,x:(boxW-w*scale)/2,y:(boxH-h*scale)/2 };
 }
+export type FacadeAnalysis = { found: boolean; zone: { x0: number; y0: number; x1: number; y1: number }; doorTopY: number | null; doorBottomY: number | null };
+export const DOOR_HEIGHT_M = 2.1;
+const DEFAULT_ZONE = { x0: 0.1, y0: 0.1, x1: 0.9, y1: 0.32 };
+const DEFAULT_ZONE_WIDTH_M = 6;
+
+/** Builds the installation surface from a validated facade analysis; falls back to a prudent upper band. */
+export function placementFromAnalysis(a: FacadeAnalysis | null, imgW: number, imgH: number, signHeightM: number): { surface: Surface; estimated: boolean } {
+  const ok = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v) && v >= 0 && v <= 1;
+  const z = a?.zone;
+  const zoneValid = !!a?.found && !!z && [z.x0, z.y0, z.x1, z.y1].every(ok) && z.x1 - z.x0 >= 0.15 && z.y1 > z.y0 && (z.y0 + z.y1) / 2 <= 0.6;
+  const zone = zoneValid && z ? z : DEFAULT_ZONE;
+  const door = a && ok(a.doorTopY) && ok(a.doorBottomY) && a.doorBottomY - a.doorTopY >= 0.15 ? (a.doorBottomY - a.doorTopY) * imgH : null;
+  const pxPerM = zoneValid && door ? door / DOOR_HEIGHT_M : ((zone.x1 - zone.x0) * imgW) / DEFAULT_ZONE_WIDTH_M;
+  const widthM = ((zone.x1 - zone.x0) * imgW) / pxPerM;
+  let y0 = zone.y0, y1 = zone.y1;
+  const needH = (signHeightM * pxPerM) / imgH;
+  if (y1 - y0 < needH) { const c = (y0 + y1) / 2; y0 = Math.max(0, c - needH / 2); y1 = Math.min(1, y0 + needH); y0 = Math.max(0, y1 - needH); }
+  const heightM = ((y1 - y0) * imgH) / pxPerM;
+  return {
+    estimated: !(zoneValid && door),
+    surface: { corners: [{ x: zone.x0, y: y0 }, { x: zone.x1, y: y0 }, { x: zone.x1, y: y1 }, { x: zone.x0, y: y1 }], widthM, heightM: Math.max(heightM, signHeightM), measured: false, center: { x: 0.5, y: 0.5 } },
+  };
+}
