@@ -1,7 +1,24 @@
 import { describe, it, expect } from "vitest";
-import { dimensions, fitLogo, signProjection, homography, project, type Surface } from "./montage-geometry";
+import { dimensions, fitLogo, signProjection, homography, project, previewDimensions, type Surface } from "./montage-geometry";
 const surface: Surface={corners:[{x:0.1,y:0.2},{x:0.9,y:0.2},{x:0.9,y:0.8},{x:0.1,y:0.8}],widthM:6,heightM:2,measured:true,center:{x:0.5,y:0.5}};
 describe("escala física",()=>{
+  it("amplía la vista de 4 metros sin cambiar la medida contratada",()=>{
+    const purchased = dimensions(4,0.8);
+    const visual = previewDimensions(surface,purchased);
+    expect(visual.widthM).toBe(5);
+    expect(visual.heightM).toBe(1);
+    expect(purchased.widthM).toBe(4);
+    expect(visual.aspectRatio).toBe(purchased.aspectRatio);
+  });
+  it("limita la ampliación al espacio disponible sin deformar",()=>{
+    const visual = previewDimensions({...surface,widthM:4.4},dimensions(4,0.8));
+    expect(visual.widthM).toBeCloseTo(4.4);
+    expect(visual.heightM).toBeCloseTo(0.88);
+    expect(()=>signProjection({...surface,widthM:4.4},visual)).not.toThrow();
+  });
+  it("no oculta medidas contratadas que no caben",()=>{
+    expect(()=>previewDimensions({...surface,widthM:3},dimensions(4,0.8))).toThrow("no cabe");
+  });
   for(const w of [1,2,3,5]) it(`${w} m mantiene su proyección física en la misma fachada`,()=>{
     const p=signProjection(surface,dimensions(w,0.6));
     expect((p[1]?.x ?? 0)-(p[0]?.x ?? 0)).toBeCloseTo(0.8*w/6,8);

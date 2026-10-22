@@ -39,6 +39,15 @@ export function fitLogo(w: number, h: number, boxW: number, boxH: number) {
   const scale = Math.min(boxW/w,boxH/h);
   return { width:w*scale,height:h*scale,x:(boxW-w*scale)/2,y:(boxH-h*scale)/2 };
 }
+/** Aesthetic preview only: enlarge uniformly, never beyond the installation surface. */
+export function previewDimensions(s: Surface, d: Dimensions): Dimensions {
+  // Validate the purchased size first; visual enhancement must not hide a sign that cannot fit.
+  signProjection(s, d);
+  const availableW = 2 * Math.min(s.center.x, 1 - s.center.x) * s.widthM;
+  const availableH = 2 * Math.min(s.center.y, 1 - s.center.y) * s.heightM;
+  const factor = Math.max(1, Math.min(1.25, availableW / d.widthM, availableH / d.heightM));
+  return dimensions(d.widthM * factor, d.heightM * factor);
+}
 export type FacadeAnalysis = { found: boolean; zone: { x0: number; y0: number; x1: number; y1: number }; doorTopY: number | null; doorBottomY: number | null };
 export const DOOR_HEIGHT_M = 2.1;
 const DEFAULT_ZONE = { x0: 0.1, y0: 0.1, x1: 0.9, y1: 0.32 };

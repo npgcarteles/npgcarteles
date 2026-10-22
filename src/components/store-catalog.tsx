@@ -32,7 +32,7 @@ export function CatalogHeading() {
 export function StoreCatalog({ width, onSelect }: { width: number; onSelect: (width: number, height: number) => void }) {
   return <div role="group" aria-label="Medida y precio del cartel" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
     {SIGN_CATALOG.map((item) => <Button key={item.width} type="button" onClick={() => onSelect(item.width, item.height)} aria-pressed={width === item.width} variant="outline" className={`relative flex h-24 min-w-0 flex-col gap-2 rounded-lg px-2 shadow-none ${width === item.width ? "border-neon bg-accent text-foreground ring-1 ring-neon" : "border-border bg-secondary/50"}`}>
-      <span className="text-lg font-bold">{item.width} M</span>
+      <span className="text-base font-bold sm:text-lg">{item.width} Metros</span>
       <span className="text-sm font-semibold">{formatARS(item.price)}</span>
       {width === item.width && <Check aria-hidden="true" className="absolute right-2 top-2 size-3 text-neon" />}
     </Button>)}

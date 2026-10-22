@@ -1,4 +1,4 @@
-import { dimensions, fitLogo, homography, project, signProjection, type Surface } from "./montage-geometry";
+import { dimensions, fitLogo, homography, project, signProjection, previewDimensions, type Surface } from "./montage-geometry";
 
 async function load(blob: Blob) {
   const url = URL.createObjectURL(blob);
@@ -25,7 +25,7 @@ function sample(src: ImageData, x: number, y: number, out: Uint8ClampedArray, o:
 // Deterministic composition: the original photo is never sent to a generative model.
 export async function composeMontage(photo: Blob, logo: Blob, surface: Surface, widthM: number, heightM: number, warm: boolean) {
   const d = dimensions(widthM, heightM);
-  const corners = signProjection(surface, d);
+  const corners = signProjection(surface, previewDimensions(surface, d));
   const [bg, mark] = await Promise.all([load(photo), load(logo)]);
   const { c, ctx } = canvas(bg.naturalWidth, bg.naturalHeight);
   ctx.drawImage(bg, 0, 0);
@@ -34,7 +34,7 @@ export async function composeMontage(photo: Blob, logo: Blob, surface: Surface, 
   const lw = Math.min(2400, Math.max(700, Math.round(d.widthM * 500)));
   const lh = Math.round(lw / d.aspectRatio);
   const layer = canvas(lw, lh);
-  const pad = Math.round(lh * 0.14);
+  const pad = Math.round(lh * 0.04);
   const fitted = fitLogo(mark.naturalWidth, mark.naturalHeight, lw - pad * 2, lh - pad * 2);
   layer.ctx.drawImage(mark, pad + fitted.x, pad + fitted.y, fitted.width, fitted.height);
   // Opal acrylic face: soft emissive tint over the logo pixels only.
