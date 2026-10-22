@@ -3,7 +3,7 @@ import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
-  calcAutoQuote, EDITABLE_STATUSES, formatNumero, PAYABLE_STATUSES, paymentOptions,
+  calcAutoQuote, catalogQuote, EDITABLE_STATUSES, formatNumero, PAYABLE_STATUSES, paymentOptions,
   type OrderStatus, type PricingSettings,
 } from "./orders.shared";
 
@@ -14,6 +14,10 @@ const configSchema = z.object({
   colores: z.string().trim().max(200),
   iluminacion: z.string().trim().min(1).max(80),
   notas: z.string().trim().max(500),
+  nombreComercial: z.string().trim().max(100).optional(),
+  catalogo: z.literal("corporeo-led").optional(),
+  retiro: z.literal("taller-area-51").optional(),
+  solicitudId: z.string().uuid().optional(),
   montaje: z.object({
     corners: z.array(z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) })).length(4),
     widthM: z.number().positive().max(100), heightM: z.number().positive().max(100), measured: z.boolean(),
@@ -64,16 +68,24 @@ export const createOrder = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const prefix = `${context.userId}/`;
     if (!data.previewPath.startsWith(prefix) || (data.logoPath && !data.logoPath.startsWith(prefix))) throw new Error("Archivo inválido");
-    const quote = calcAutoQuote(data.config, await readPricing());
+    const fixedQuote = catalogQuote(data.config);
+    const quote = fixedQuote ?? calcAutoQuote(data.config, await readPricing());
     const db = await admin();
-    const status: OrderStatus = quote ? "presupuesto_confirmado" : "esperando_presupuesto";
+    const findExisting = async () => data.config.solicitudId ? (await db.from("orders").select("id,numero").eq("user_id", context.userId).contains("config", { solicitudId: data.config.solicitudId }).maybeSingle()).data : null;
+    const existing = await findExisting();
+    if (existing) return { id: existing.id, numero: formatNumero(existing.numero) };
+    const status: OrderStatus = fixedQuote || !quote ? "esperando_presupuesto" : "presupuesto_confirmado";
     const { data: order, error } = await db.from("orders").insert({
       user_id: context.userId, status, config: data.config, contacto: data.contacto,
       preview_path: data.previewPath, logo_path: data.logoPath,
       total_ars: quote?.total ?? null, deposit_ars: quote?.deposit ?? null, quote_version: quote ? 1 : 0,
     }).select("id,numero").single();
-    if (error || !order) { console.error(error); throw new Error("No se pudo crear el pedido"); }
-    await db.from("order_events").insert({ order_id: order.id, status, message: quote ? "Pedido creado con presupuesto automático" : "Pedido creado; esperando presupuesto de NPG" });
+    if (error || !order) {
+      const duplicate = await findExisting();
+      if (duplicate) return { id: duplicate.id, numero: formatNumero(duplicate.numero) };
+      console.error(error); throw new Error("No se pudo crear el pedido");
+    }
+    await db.from("order_events").insert({ order_id: order.id, status, message: fixedQuote ? "Solicitud registrada con precio de catálogo y retiro gratuito en Taller Área 51. Pendiente de confirmación de disponibilidad y fabricación; instalación no incluida." : quote ? "Pedido creado con presupuesto automático" : "Pedido creado; esperando presupuesto de NPG" });
     return { id: order.id, numero: formatNumero(order.numero) };
   });
 
@@ -121,10 +133,13 @@ export const updateOrderDesign = createServerFn({ method: "POST" })
     const { data: o } = await db.from("orders").select("*").eq("id", data.id).eq("user_id", context.userId).maybeSingle();
     if (!o) throw new Error("Pedido no encontrado");
     if (!EDITABLE_STATUSES.includes(o.status as OrderStatus) || (await approvedPaid(o.id, o.quote_version)) > 0) throw new Error("Este pedido ya no se puede editar");
-    const quote = calcAutoQuote(data.config, await readPricing());
-    const status: OrderStatus = quote ? "presupuesto_confirmado" : "esperando_presupuesto";
+    const oldConfig = o.config as { catalogo?: string; solicitudId?: string };
+    const config = oldConfig.catalogo === "corporeo-led" ? { ...data.config, catalogo: "corporeo-led" as const, retiro: "taller-area-51" as const, solicitudId: oldConfig.solicitudId } : data.config;
+    const fixedQuote = catalogQuote(config);
+    const quote = fixedQuote ?? calcAutoQuote(config, await readPricing());
+    const status: OrderStatus = fixedQuote || !quote ? "esperando_presupuesto" : "presupuesto_confirmado";
     await db.from("orders").update({
-      config: data.config, status, total_ars: quote?.total ?? null, deposit_ars: quote?.deposit ?? null,
+      config, status, total_ars: quote?.total ?? null, deposit_ars: quote?.deposit ?? null,
       preview_path: null,
       quote_version: o.quote_version + 1, updated_at: now(),
     }).eq("id", o.id);
@@ -211,6 +226,8 @@ export const adminSetQuote = createServerFn({ method: "POST" })
     const { data: o } = await db.from("orders").select("*").eq("id", data.id).single();
     if (!o) throw new Error("Pedido no encontrado");
     if ((await approvedPaid(o.id, o.quote_version)) > 0) throw new Error("Este pedido ya tiene pagos aprobados; no se puede cambiar el presupuesto");
+    const fixedQuote = catalogQuote(o.config as Parameters<typeof catalogQuote>[0]);
+    if (fixedQuote && data.total !== fixedQuote.total) throw new Error("El total debe coincidir con el precio de catálogo. La instalación se cotiza por separado.");
     await db.from("orders").update({
       total_ars: data.total, deposit_ars: data.deposit, quote_note: data.note || null,
       quote_version: o.quote_version + 1, status: "presupuesto_confirmado", updated_at: now(),
@@ -228,7 +245,7 @@ export const adminSetStatus = createServerFn({ method: "POST" })
     const { data: o } = await db.from("orders").select("id,status").eq("id", data.id).single();
     if (!o) throw new Error("Pedido no encontrado");
     const allowed: Record<string, string[]> = { en_fabricacion: ["pago_aprobado"], finalizado: ["en_fabricacion"] };
-    if (!allowed[data.status]!.includes(o.status)) throw new Error("Transición de estado no permitida");
+    if (!allowed[data.status]?.includes(o.status)) throw new Error("Transición de estado no permitida");
     await db.from("orders").update({ status: data.status, updated_at: now() }).eq("id", o.id);
     await db.from("order_events").insert({ order_id: o.id, status: data.status, message: data.status === "en_fabricacion" ? "El cartel pasó a fabricación" : "Pedido finalizado" });
     return { ok: true };

@@ -13,6 +13,10 @@ export type OrderConfig = {
   colores: string;
   iluminacion: string;
   notas: string;
+  nombreComercial?: string;
+  catalogo?: "corporeo-led" | undefined;
+  retiro?: "taller-area-51" | undefined;
+  solicitudId?: string;
   montaje?: { corners: {x: number; y: number}[]; widthM: number; heightM: number; measured: boolean; center: {x: number; y: number}; method: "planar_homography" };
 };
 
@@ -47,6 +51,20 @@ export const STATUS_MESSAGE: Record<OrderStatus, string> = {
 export const formatNumero = (n: number) => `NPG-${String(n).padStart(6, "0")}`;
 export const formatARS = (n: number) =>
   new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 2 }).format(n);
+
+export const SIGN_CATALOG = [
+  { width: 2, height: 0.5, price: 520000 },
+  { width: 3, height: 0.6, price: 720000 },
+  { width: 4, height: 0.8, price: 850000 },
+  { width: 5, height: 1, price: 970000 },
+] as const;
+export const WORKSHOP_MAP_URL = "https://maps.app.goo.gl/CEHPtrPkt9BuEcRaA";
+export function catalogQuote(config: Pick<OrderConfig, "catalogo" | "tipo" | "ancho" | "alto" | "retiro">) {
+  if (config.catalogo !== "corporeo-led") return null;
+  const item = SIGN_CATALOG.find((p) => p.width === config.ancho);
+  if (!item || config.tipo !== "Corpóreo LED" || config.alto !== item.height || config.retiro !== "taller-area-51") throw new Error("La medida o el retiro del catálogo no son válidos");
+  return { total: item.price, deposit: null };
+}
 
 /** Statuses where the client may still change the design (no money taken yet). */
 export const EDITABLE_STATUSES: OrderStatus[] = [

@@ -1,10 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { StoreCatalog, InstallationNotice, WorkshopPickup } from "@/components/store-catalog";
+import { SIGN_CATALOG, formatARS } from "@/lib/orders.shared";
+import { Input } from "@/components/ui/input";
 import { saveDraft } from "@/lib/draft-store";
 import { AccountLinks } from "@/components/site-header";
 import { useEffect, useRef, useState } from "react";
 const MAX_PRUEBAS = 2;
-const ANCHOS = ["2", "3", "4", "5"];
-const ALTO_POR_ANCHO: Record<string, string> = { "2": "0.5", "3": "0.6", "4": "0.8", "5": "1" };
+const ANCHOS = SIGN_CATALOG.map((item) => String(item.width));
+const ALTO_POR_ANCHO: Record<string, string> = Object.fromEntries(SIGN_CATALOG.map((item) => [String(item.width), String(item.height)]));
 import { Award, Box, Brush, Check, Download, HeartHandshake, ImagePlus, Lightbulb, Loader2, Menu, MessageCircle, Palette, PenTool, Printer, Rocket, Sparkles, Store, Users, X, Layers, Wand2 } from "lucide-react";
 import spaceBg from "@/assets/space-bg.jpg";
 import alien from "@/assets/alien.png";
@@ -24,10 +27,10 @@ const WHATSAPP = "5492975169780";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "NPG — Hacemos que tu negocio impacte" },
-      { name: "description", content: "Diseñá y visualizá tu próximo cartel con NPG: subí tu fachada y tu logo y mirá la simulación con IA." },
-      { property: "og:title", content: "NPG — Hacemos que tu negocio impacte" },
-      { property: "og:description", content: "Corpóreo LED, vinilos, ploteos de vidrieras y ventanales y rotulaciones simulados en tu fachada." },
+      { title: "Carteles lindos al mejor precio — NPG Cartelería" },
+      { name: "description", content: "Corpóreos LED de 2 a 5 metros con precios en pesos argentinos, simulación y retiro gratuito en Taller Área 51." },
+      { property: "og:title", content: "Carteles lindos al mejor precio — NPG Cartelería" },
+      { property: "og:description", content: "Elegí tu medida y personalizá tu Corpóreo LED. Retiro gratuito; instalación por separado." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -212,6 +215,7 @@ async function reducePhoto(file: File) {
 
 function Index() {
   const revision = useRef(0);
+  const [nombreComercial, setNombreComercial] = useState("");
   const [foto, setFoto] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
   const [cfg, setCfg] = useState<SignConfig>({ tipo: "Corpóreo LED", tamano: "3 m de ancho x 0.6 m de alto", colores: "", iluminacion: ILUMINACION[0] ?? "", notas: "" });
@@ -271,7 +275,7 @@ function Index() {
     setSaving(true);
     try {
       const preview = await (await fetch(result)).blob();
-      await saveDraft({ preview, logo, ...(foto ? {originalPhoto: foto} : {}), savedAt: Date.now(), config: { montaje: {...surface,method:"planar_homography"}, tipo: cfg.tipo, ancho: Number(ancho), alto: Number(alto), colores: cfg.colores, iluminacion: cfg.iluminacion, notas: cfg.notas } });
+      await saveDraft({ preview, logo, ...(foto ? {originalPhoto: foto} : {}), savedAt: Date.now(), config: { catalogo: "corporeo-led", retiro: "taller-area-51", nombreComercial, montaje: {...surface,method:"planar_homography"}, tipo: cfg.tipo, ancho: Number(ancho), alto: Number(alto), colores: cfg.colores, iluminacion: cfg.iluminacion, notas: cfg.notas } });
       navigate({ to: "/pedido/nuevo" });
     } catch { setError("No se pudo preparar el pedido. Probá de nuevo."); setSaving(false); }
   }
@@ -310,9 +314,9 @@ function Index() {
       </section>
 
       {/* CONFIGURADOR */}
-      <section id="crear" className="relative scroll-mt-16 px-5 py-20">
-        <div className="absolute left-1/2 top-0 h-96 w-[60rem] max-w-full -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" aria-hidden />
-        <div className="relative mx-auto max-w-6xl rounded-3xl border border-border bg-gradient-to-b from-secondary/50 to-background p-4 shadow-glow md:p-10">
+      <section id="crear" className="relative scroll-mt-16 border-y border-border px-5 py-16">
+        <div className="relative mx-auto max-w-6xl">
+          <StoreCatalog width={Number(ancho)} onSelect={(a, h) => setMedida(String(a), String(h))} />
           <div className="mb-8 flex flex-col items-center gap-4 md:flex-row md:items-end md:justify-between">
             <div className="text-center md:text-left">
               <p className="mb-2 text-xs font-semibold tracking-[0.3em] text-neon">ESTUDIO NPG</p>
@@ -329,7 +333,8 @@ function Index() {
           </div>
 
           <div className="grid gap-5">
-            <Step n={1} title="Subí tus imágenes" done={!!foto && !!logo}>
+            <Step n={1} title="Personalizá tu cartel" done={!!foto && !!logo}>
+              <label className="mb-5 grid gap-2 text-sm">Nombre comercial (opcional)<Input value={nombreComercial} onChange={(e) => setNombreComercial(e.target.value)} maxLength={100} placeholder="Nombre de tu negocio" /></label>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Upload label="Foto del local" file={foto} onFile={setFoto} />
                 <Upload label="Tu logo" file={logo} onFile={setLogo} />
@@ -381,16 +386,19 @@ function Index() {
               )}
             </Step>
 
-            <Step n={4} title="Descargá y comprá" done={false}>
+            <InstallationNotice />
+            <WorkshopPickup />
+            <Step n={4} title="Revisá tu compra" done={false}>
+              <dl className="mb-5 grid gap-3 text-sm sm:grid-cols-2"><div><dt className="text-muted-foreground">Medida elegida</dt><dd className="font-bold">{ancho} metros · {cfg.tipo}</dd></div><div><dt className="text-muted-foreground">Precio del cartel</dt><dd className="text-xl font-bold">{formatARS(SIGN_CATALOG.find((p) => p.width === Number(ancho))?.price ?? 0)}</dd></div><div><dt className="text-muted-foreground">Iluminación</dt><dd>{cfg.iluminacion}</dd></div><div><dt className="text-muted-foreground">Entrega</dt><dd>Retiro gratis en Taller Área 51</dd></div></dl>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <a href={ready && result ? result : undefined} download="npg-studio-simulacion.png" aria-disabled={!ready}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-full border border-neon py-3.5 font-semibold text-neon transition hover:bg-accent ${ready ? "" : "pointer-events-none opacity-40"}`}>
                   <Download className="h-4 w-4" /> Descargar PNG
                 </a>
-                <button onClick={continuarPedido} disabled={!ready || saving}
+                <Button onClick={continuarPedido} disabled={!ready || saving}
                   className="flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-brand py-3.5 font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40">
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} COMPRAR
-                </button>
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} CONTINUAR COMPRA
+                </Button>
               </div>
             </Step>
           </div>

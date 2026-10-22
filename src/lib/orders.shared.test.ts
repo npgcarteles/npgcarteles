@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { calcAutoQuote, deriveOrderStatus, paymentOptions } from "./orders.shared";
+import { calcAutoQuote, catalogQuote, deriveOrderStatus, paymentOptions } from "./orders.shared";
+
+describe("catálogo NPG", () => {
+  const config = { catalogo: "corporeo-led" as const, tipo: "Corpóreo LED", retiro: "taller-area-51" as const };
+  it("2 metros cuestan 520000 ARS", () => expect(catalogQuote({ ...config, ancho: 2, alto: 0.5 })?.total).toBe(520000));
+  it("3 metros cuestan 720000 ARS", () => expect(catalogQuote({ ...config, ancho: 3, alto: 0.6 })?.total).toBe(720000));
+  it("4 metros cuestan 850000 ARS", () => expect(catalogQuote({ ...config, ancho: 4, alto: 0.8 })?.total).toBe(850000));
+  it("5 metros cuestan 970000 ARS", () => expect(catalogQuote({ ...config, ancho: 5, alto: 1 })?.total).toBe(970000));
+  it("retiro gratuito sin instalación ni adicionales", () => expect(catalogQuote({ ...config, ancho: 2, alto: 0.5 })).toEqual({ total: 520000, deposit: null }));
+  it("rechaza medidas fuera del catálogo", () => expect(() => catalogQuote({ ...config, ancho: 2.5, alto: 0.5 })).toThrow());
+  it("rechaza altura diferente a la simulación seleccionada", () => expect(() => catalogQuote({ ...config, ancho: 3, alto: 1 })).toThrow());
+  it("conserva presupuestos anteriores", () => expect(catalogQuote({ tipo: "Corpóreo LED", ancho: 3, alto: 0.6 })).toBeNull());
+});
 
 describe("presupuesto", () => {
   it("sin precios configurados queda en modo manual", () => {

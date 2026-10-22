@@ -8,6 +8,13 @@
       "when": 1792607057816,
       "tag": "0000_orders_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792631326134,
+      "tag": "0001_order_request_idempotency",
+      "breakpoints": true
     }
   ]
 }

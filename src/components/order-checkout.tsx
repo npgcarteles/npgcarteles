@@ -49,7 +49,7 @@ export function OrderCheckout({ total, paid, options, selected, isOwner, busy, e
   return (
     <section aria-label="Pago del pedido">
       <div className="bg-muted px-6 py-5 text-base font-bold">
-        Total estimado {total == null ? "· Pendiente de presupuesto" : formatARS(total)}
+        Total del cartel {total == null ? "· Pendiente de presupuesto" : formatARS(total)}
       </div>
       <div className="px-6 py-7">
         <h2 className="text-lg font-bold">Cupones de descuento y Gift Cards</h2>
