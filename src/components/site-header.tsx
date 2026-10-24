@@ -2,7 +2,6 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import npgLogo from "@/assets/npg-logo.png.asset.json";
 
 export function useSessionEmail() {
   const [email, setEmail] = useState<string | null | undefined>(undefined);
@@ -53,7 +52,7 @@ export function SiteHeader() {
   return (
     <nav className="glass sticky top-0 z-40 border-b border-border">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-        <Link to="/" aria-label="NPG — Inicio"><img src={npgLogo.url} alt="NPG Diseño & Cartelería" width={672} height={679} className="h-11 w-auto" /></Link>
+        <Link to="/" aria-label="NPG — Inicio"><img src={"/npg-logo.png"} alt="NPG Diseño & Cartelería" width={192} height={99} className="h-8 w-auto" /></Link>
         <AccountLinks />
       </div>
     </nav>
@@ -74,3 +73,6 @@ export function CheckoutSteps({ current }: { current: number }) {
     </ol>
   );
 }
+
+
+
