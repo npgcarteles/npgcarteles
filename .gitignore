@@ -30,3 +30,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local environment secrets and Vercel build output
+.env
+.env.*
+!.env.example
+.vercel/
+
+
+

@@ -32,3 +32,10 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Configuración local y Vercel
+
+Copiá .env.example como .env y completá OPENAI_API_KEY y MP_ACCESS_TOKEN. En Vercel, cargá esas mismas variables para Production, Preview y Development. La aplicación usa TanStack Start con Nitro y se despliega desde la raíz del proyecto con 
+pm install y 
+pm run build.
+

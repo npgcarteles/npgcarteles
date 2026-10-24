@@ -1,10 +1,11 @@
 // Server-only Mercado Pago helpers (Checkout Pro). Never import from client code.
+import { MercadoPagoConfig, Preference } from "mercadopago";
 import { deriveOrderStatus, type OrderStatus } from "./orders.shared";
 
 const API = "https://api.mercadopago.com";
 
 function accessToken() {
-  const t = process.env["MERCADOPAGO_ACCESS_TOKEN"];
+  const t = process.env["MP_ACCESS_TOKEN"] ?? process.env["MERCADOPAGO_ACCESS_TOKEN"];
   if (!t) throw new Error("Los pagos todavía no están configurados. Contactá a NPG.");
   return t;
 }
@@ -25,18 +26,16 @@ export async function createPreference(p: {
     body["auto_return"] = "approved";
     body["notification_url"] = `${p.origin}/api/public/mercadopago/webhook`;
   }
-  const res = await fetch(`${API}/checkout/preferences`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", "X-Idempotency-Key": p.paymentRowId },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    console.error("MP preference error", res.status, await res.text().catch(() => ""));
+  try {
+    const preference = new Preference(new MercadoPagoConfig({ accessToken: token }));
+    const json = await preference.create({ body: body as Parameters<typeof preference.create>[0]["body"], requestOptions: { idempotencyKey: p.paymentRowId } });
+    const url = token.startsWith("TEST-") && json.sandbox_init_point ? json.sandbox_init_point : json.init_point;
+    if (!json.id || !url) throw new Error("Missing preference checkout URL");
+    return { id: json.id, url };
+  } catch (error) {
+    console.error("MP preference error", error instanceof Error ? error.message : error);
     throw new Error("No se pudo iniciar el pago con Mercado Pago. Probá de nuevo en unos minutos.");
   }
-  const json = (await res.json()) as { id: string; init_point: string; sandbox_init_point?: string };
-  const url = token.startsWith("TEST-") && json.sandbox_init_point ? json.sandbox_init_point : json.init_point;
-  return { id: json.id, url };
 }
 
 export type MpPayment = {
@@ -105,3 +104,4 @@ export async function applyPayment(mp: MpPayment) {
     message: amountOk ? `Mercado Pago informó el pago #${mp.id}: ${mp.status}` : `Pago #${mp.id} con importe que no coincide; no se aprobó`,
   });
 }
+

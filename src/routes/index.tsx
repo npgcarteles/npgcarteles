@@ -214,7 +214,12 @@ function Index() {
   const [ancho, setAncho] = useState("3");
   const [alto, setAlto] = useState("0.6");
   const [usadas, setUsadas] = useState(0);
-  useEffect(() => { setUsadas(Number(localStorage.getItem("npg-pruebas") || 0)); }, []);
+  const [misDisenos, setMisDisenos] = useState<{ id: number; image: string; name: string; width: number; height: number }[]>([]);
+  const [paying, setPaying] = useState(false);
+  useEffect(() => {
+    setUsadas(Number(localStorage.getItem("npg-pruebas") || 0));
+    try { setMisDisenos(JSON.parse(localStorage.getItem("Mis diseños") || "[]")); } catch { setMisDisenos([]); }
+  }, []);
   const restantes = Math.max(0, MAX_PRUEBAS - usadas);
   useEffect(() => { revision.current += 1; setResult(null); setFinal(false); setError(null); }, [foto, logo, cfg]);
   const setMedida = (a: string, h: string) => { setAncho(a); setAlto(h); setCfg((c) => ({ ...c, tamano: `${a} m de ancho x ${h} m de alto` })); };
@@ -241,6 +246,23 @@ function Index() {
       await streamImage("/api/edit-image", form, (src, isFinal) => {
         if (revision.current !== startedRevision) return;
         setResult(src); setFinal(isFinal);
+        if (isFinal) {
+          const image = new Image();
+          image.onload = () => {
+            const canvas = document.createElement("canvas");
+            const scale = Math.min(1, 640 / image.width);
+            canvas.width = Math.round(image.width * scale); canvas.height = Math.round(image.height * scale);
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            const item = { id: Date.now(), image: canvas.toDataURL("image/jpeg", 0.7), name: nombreComercial || "Mi cartel", width: Number(ancho), height: Number(alto) };
+            try {
+              const next = [item, ...JSON.parse(localStorage.getItem("Mis diseños") || "[]")].slice(0, 5);
+              localStorage.setItem("Mis diseños", JSON.stringify(next)); setMisDisenos(next);
+            } catch { setError("Diseño generado. No se pudo guardar en este navegador por falta de espacio."); }
+          };
+          image.src = src;
+        }
       });
       if (revision.current !== startedRevision) throw new Error("La configuración cambió. Generá un montaje nuevo.");
       const n = usadas + 1;
@@ -258,6 +280,16 @@ function Index() {
   );
   const waLink = `https://wa.me/${WHATSAPP}?text=${waText}`;
   const waContact = `https://wa.me/${WHATSAPP}`;
+  async function pagarConMercadoPago() {
+    if (!ready) return;
+    setPaying(true); setError(null);
+    try {
+      const response = await fetch("/api/mercadopago", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ width: Number(ancho), height: Number(alto), businessName: nombreComercial }) });
+      const data = await response.json() as { init_point?: string; error?: string };
+      if (!response.ok || !data.init_point) throw new Error(data.error || "No se pudo iniciar el pago.");
+      window.location.assign(data.init_point);
+    } catch (e) { setError(e instanceof Error ? e.message : "No se pudo iniciar el pago."); setPaying(false); }
+  }
   useEffect(() => () => { if (result?.startsWith("blob:")) URL.revokeObjectURL(result); }, [result]);
   const ready = !!(result && final);
   const navigate = useNavigate();
@@ -366,6 +398,13 @@ function Index() {
               {result ? (
                 <img src={result} alt="Simulación del cartel" className={`mt-6 w-full rounded-2xl border border-border transition-[filter] duration-700 ${final ? "blur-0" : "blur-2xl"}`} />
               ) : null}
+              {result && <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <Button onClick={pagarConMercadoPago} disabled={!ready || paying} className="min-h-14 w-full rounded-xl bg-[#FFD700] px-5 py-4 font-display text-base font-extrabold text-black shadow-[0_8px_24px_rgba(255,215,0,0.22)] hover:bg-[#f2cb00] disabled:opacity-50">
+                  {paying ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> ABRIENDO MERCADO PAGO…</> : "PAGAR CON MERCADO PAGO"}
+                </Button>
+                <a href={waLink} target="_blank" rel="noreferrer" className="flex min-h-14 items-center justify-center rounded-xl border border-white/20 bg-black px-5 py-4 text-center font-display text-sm font-bold text-white transition hover:border-[#FFD700] hover:text-[#FFD700]">PEDIR POR WHATSAPP</a>
+              </div>}
+              {misDisenos.length > 0 && <section className="mt-8" aria-label="Mis diseños"><h4 className="mb-3 font-display text-lg">Mis diseños</h4><div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{misDisenos.map((design) => <button key={design.id} type="button" onClick={() => { setResult(design.image); setFinal(true); setAncho(String(design.width)); setAlto(String(design.height)); }} className="overflow-hidden rounded-xl border border-border text-left transition hover:border-[#FFD700]"><img src={design.image} alt={design.name} className="aspect-video w-full object-cover"/><span className="block truncate px-3 py-2 text-sm">{design.name}</span></button>)}</div></section>}
               {result && <p className="mt-3 text-sm font-semibold">Medida del pedido: {ancho} m × {alto} m · Vista ilustrativa: escala real no verificada.</p>}
               <p role="note" className="mt-3 rounded-xl border border-border bg-muted/40 px-4 py-3 text-xs leading-5 text-muted-foreground">
                   <strong className="text-foreground">Aviso importante:</strong> Este contenido visual corresponde a una simulación gráfica optimizada. Ha sido generado exclusivamente como una muestra de referencia estética, por lo que no constituye una oferta contractual ni una réplica exacta del entregable final.
@@ -466,3 +505,4 @@ function Index() {
     </main>
   );
 }
+
