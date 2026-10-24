@@ -6,7 +6,7 @@ export const Route = createFileRoute("/api/mercadopago")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const token = process.env["MP_ACCESS_TOKEN"];
+        const token = process.env["MP_ACCESS_TOKEN"] || process.env["MP_ACCES_TOKEN"] || process.env["MERCADOPAGO_ACCESS_TOKEN"];
         if (!token) return Response.json({ error: "Falta configurar MP_ACCESS_TOKEN" }, { status: 500 });
         let data: { width?: number; height?: number; businessName?: string };
         try { data = await request.json(); } catch { return Response.json({ error: "Solicitud inválida" }, { status: 400 }); }

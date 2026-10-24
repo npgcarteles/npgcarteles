@@ -3,7 +3,7 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { loadEnv } from "vite";
 
 const env = loadEnv(process.env["NODE_ENV"] === "production" ? "production" : "development", process.cwd(), "");
-for (const key of ["OPENAI_API_KEY", "MP_ACCESS_TOKEN", "MERCADOPAGO_ACCESS_TOKEN", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"]) {
+for (const key of ["OPENAI_API_KEY", "MP_ACCESS_TOKEN", "MP_ACCES_TOKEN", "MERCADOPAGO_ACCESS_TOKEN", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"]) {
   if (env[key] && !process.env[key]) process.env[key] = env[key];
 }
 

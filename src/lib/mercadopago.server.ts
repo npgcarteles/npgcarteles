@@ -5,7 +5,7 @@ import { deriveOrderStatus, type OrderStatus } from "./orders.shared";
 const API = "https://api.mercadopago.com";
 
 function accessToken() {
-  const t = process.env["MP_ACCESS_TOKEN"] ?? process.env["MERCADOPAGO_ACCESS_TOKEN"];
+  const t = process.env["MP_ACCESS_TOKEN"] || process.env["MP_ACCES_TOKEN"] || process.env["MERCADOPAGO_ACCESS_TOKEN"];
   if (!t) throw new Error("Los pagos todavía no están configurados. Contactá a NPG.");
   return t;
 }
