@@ -13,7 +13,6 @@ import trBocados from "@/assets/trabajo-bocados.png.asset.json";
 import trAroma from "@/assets/trabajo-panaderia-aroma.png.asset.json";
 import trChipa from "@/assets/trabajo-senor-chipa.png.asset.json";
 import trQueso from "@/assets/trabajo-punto-queso.png.asset.json";
-import npgLogo from "@/assets/npg-logo.png.asset.json";
 import { streamImage } from "@/lib/stream-image";
 import { Button } from "@/components/ui/button";
 import { buildPrompt, ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
@@ -92,8 +91,8 @@ function Nav() {
   const [open, setOpen] = useState(false);
   return (
     <nav className="glass fixed inset-x-0 top-0 z-50 border-b border-border">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-        <a href="#inicio" aria-label="NPG Diseño & Cartelería — Inicio"><img src={npgLogo.url} alt="NPG Diseño & Cartelería" width={672} height={679} className="h-11 w-auto" /></a>
+      <div className="mx-auto flex h-12 max-w-7xl items-center justify-between px-[clamp(1.5rem,9vw,5.5rem)]">
+        <a href="#inicio" aria-label="NPG Diseño & Cartelería — Inicio"><img src={"/npg-logo.png"} alt="NPG Diseño & Cartelería" width={192} height={99} className="h-8 w-auto" /></a>
         <ul className="hidden gap-7 text-sm md:flex">
           {NAV.map((n) => (
             <li key={n.id}><a href={`#${n.id}`} className="text-muted-foreground transition hover:text-foreground">{n.label}</a></li>
@@ -314,18 +313,21 @@ function Index() {
         <img src={spaceBg} alt="" width={1920} height={1088} className="absolute inset-0 h-full w-full object-cover" />
         <div className="starfield absolute inset-0" aria-hidden />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40" />
-        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-6 px-5 py-12 md:grid-cols-2">
+        <div className="relative mx-auto grid w-full max-w-7xl items-center gap-8 px-[clamp(1.5rem,9vw,5.5rem)] py-12 md:grid-cols-2 md:gap-12">
           <div className="animate-rise text-center md:text-left">
-            <img src={npgLogo.url} alt="NPG Diseño & Cartelería" width={672} height={679} className="mx-auto mb-6 h-24 w-auto drop-shadow-[0_0_24px_rgba(118,43,255,0.6)] md:mx-0 md:h-32" />
-            <h1 className="text-[2.6rem] leading-[1.02] sm:text-6xl lg:text-7xl">
-              Hacemos que tu negocio <span className="text-gradient">impacte</span>
+            <img src={"/npg-logo.png"} alt="NPG Diseño & Cartelería" width={192} height={99} className="mx-auto mb-5 h-20 w-auto drop-shadow-[0_0_24px_rgba(118,43,255,0.6)] md:mx-0 md:h-24" />
+            <h1 className="text-[clamp(2.55rem,6vw,4.5rem)] leading-[0.96] tracking-[-0.055em]">
+              <span className="block">Hacemos</span>
+              <span className="block">que tu</span>
+              <span className="block">negocio</span>
+              <span className="text-gradient block">impacte</span>
             </h1>
             <p className="mx-auto mt-5 max-w-md text-lg text-muted-foreground md:mx-0">Diseñá y visualizá tu próximo cartel con NPG.</p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
               <a href="#crear" className="rounded-full bg-gradient-brand px-8 py-4 text-center font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.03]">Empezar a diseñar</a>
               <a href="#servicios" className="rounded-full border border-border px-8 py-4 text-center text-sm font-semibold transition hover:border-neon">Conocé nuestros servicios</a>
             </div>
-            <p className="mt-6 text-sm tracking-widest text-muted-foreground">Diseño · Fabricación · Instalación</p>
+            <p className="mt-5 text-sm tracking-widest text-muted-foreground">Diseño · Fabricación · Instalación</p>
           </div>
           <Alien className="mx-auto w-[min(72vw,320px)] md:w-full md:max-w-[480px]" />
         </div>
@@ -482,7 +484,7 @@ function Index() {
           <img src={alien} alt="" width={200} height={200} loading="lazy" className="w-36 animate-float md:w-52" />
           <div className="text-center md:text-left">
             <h2 className="text-3xl md:text-5xl">¿Listo para hacer <span className="text-gradient">despegar</span> tu idea?</h2>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
               <a href={waContact} target="_blank" rel="noreferrer" className="rounded-full bg-gradient-brand px-8 py-4 text-center font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.03]">Contactanos</a>
               <a href={waLink} target="_blank" rel="noreferrer" className="rounded-full border border-border px-8 py-4 text-center text-sm font-semibold transition hover:border-neon">Solicitar presupuesto</a>
             </div>
@@ -505,4 +507,7 @@ function Index() {
     </main>
   );
 }
+
+
+
 

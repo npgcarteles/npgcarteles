@@ -4,7 +4,6 @@ import { ArrowLeft, Handshake, Loader2, LockKeyhole, MessageCircle, ShoppingBag 
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { formatARS, type PaymentKind, type PaymentOption } from "@/lib/orders.shared";
-import npgLogo from "@/assets/npg-logo.png.asset.json";
 
 export function CheckoutHeader() {
   return (
@@ -13,7 +12,7 @@ export function CheckoutHeader() {
         <Button asChild variant="ghost" size="icon" className="absolute left-4" title="Volver a mis pedidos">
           <Link to="/pedidos" aria-label="Volver a mis pedidos"><ArrowLeft /></Link>
         </Button>
-        <Link to="/" aria-label="NPG — Inicio"><img src={npgLogo.url} alt="NPG Diseño & Cartelería" className="checkout-logo h-20 w-20 object-contain" /></Link>
+        <Link to="/" aria-label="NPG — Inicio"><img src={"/npg-logo.png"} alt="NPG Diseño & Cartelería" className="checkout-logo h-20 w-20 object-contain" /></Link>
         <Button asChild variant="ghost" size="icon" className="absolute right-4" title="Mis pedidos">
           <Link to="/pedidos" aria-label="Mis pedidos"><ShoppingBag className="size-6" /></Link>
         </Button>
@@ -92,3 +91,4 @@ function PaymentRow({ value, disabled, title, note }: { value: string; disabled:
 export function CheckoutWhatsApp() {
   return <Button asChild size="icon" className="fixed bottom-5 right-5 z-40 size-14 rounded-full bg-whatsapp text-whatsapp-foreground shadow-none hover:bg-whatsapp/90" title="Consultar a NPG por WhatsApp"><a href="https://wa.me/5492975169780" target="_blank" rel="noopener noreferrer" aria-label="Consultar a NPG por WhatsApp"><MessageCircle className="size-7" /></a></Button>;
 }
+
