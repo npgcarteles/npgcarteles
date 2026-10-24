@@ -9,14 +9,14 @@ const MAX_PRUEBAS = 2;
 import { Award, Box, Brush, Check, Download, HeartHandshake, ImagePlus, Lightbulb, Loader2, Menu, MessageCircle, Palette, PenTool, Printer, Rocket, Sparkles, Store, Users, X, Layers, Wand2 } from "lucide-react";
 import spaceBg from "@/assets/space-bg.jpg";
 import alien from "@/assets/alien.png";
-import trBocados from "@/assets/trabajo-bocados.png.asset.json";
-import trAroma from "@/assets/trabajo-panaderia-aroma.png.asset.json";
-import trChipa from "@/assets/trabajo-senor-chipa.png.asset.json";
-import trQueso from "@/assets/trabajo-punto-queso.png.asset.json";
 import { streamImage } from "@/lib/stream-image";
 import { Button } from "@/components/ui/button";
 import { buildPrompt, ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
 
+const trBocados = "/assets/trabajo-bocados.png";
+const trAroma = "/assets/trabajo-panaderia-aroma.png";
+const trChipa = "/assets/trabajo-senor-chipa.png";
+const trQueso = "/assets/trabajo-punto-queso.png";
 const WHATSAPP = "5492975169780";
 
 export const Route = createFileRoute("/")({
@@ -34,8 +34,8 @@ export const Route = createFileRoute("/")({
 });
 
 const TRABAJOS = [
-  { titulo: "Corpóreo LED de polyfan", items: [{ nombre: "Bocado's", img: trBocados.url }, { nombre: "Panadería Aroma", img: trAroma.url }] },
-  { titulo: "Corpóreo LED de acrílico", items: [{ nombre: "Señor Chipá", img: trChipa.url }, { nombre: "Punto Queso", img: trQueso.url }] },
+  { titulo: "Corpóreo LED de polyfan", items: [{ nombre: "Bocado's", img: trBocados }, { nombre: "Panadería Aroma", img: trAroma }] },
+  { titulo: "Corpóreo LED de acrílico", items: [{ nombre: "Señor Chipá", img: trChipa }, { nombre: "Punto Queso", img: trQueso }] },
 ];
 
 const NAV = [
@@ -92,7 +92,7 @@ function Nav() {
   return (
     <nav className="glass fixed inset-x-0 top-0 z-50 border-b border-border">
       <div className="mx-auto flex h-12 max-w-7xl items-center justify-between px-[clamp(1.5rem,9vw,5.5rem)]">
-        <a href="#inicio" aria-label="NPG Diseño & Cartelería — Inicio"><img src={"/npg-logo.png"} alt="NPG Diseño & Cartelería" width={192} height={99} className="h-8 w-auto" /></a>
+        <a href="#inicio" aria-label="NPG Diseño & Cartelería — Inicio"><img src={"/assets/npg-logo.png"} alt="NPG Diseño & Cartelería" width={189} height={133} className="h-8 w-auto" /></a>
         <ul className="hidden gap-7 text-sm md:flex">
           {NAV.map((n) => (
             <li key={n.id}><a href={`#${n.id}`} className="text-muted-foreground transition hover:text-foreground">{n.label}</a></li>
@@ -233,7 +233,7 @@ function Index() {
       const form = new FormData();
       form.append("image[]", foto);
       form.append("image[]", logo);
-      const references = await Promise.all([trBocados.url, trChipa.url].map(async (url) => {
+      const references = await Promise.all([trBocados, trChipa].map(async (url) => {
         const response = await fetch(url);
         if (!response.ok) throw new Error("No se pudieron cargar las fotos de referencia de NPG. Probá de nuevo.");
         return response.blob();
@@ -315,7 +315,7 @@ function Index() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40" />
         <div className="relative mx-auto grid w-full max-w-7xl items-center gap-8 px-[clamp(1.5rem,9vw,5.5rem)] py-12 md:grid-cols-2 md:gap-12">
           <div className="animate-rise text-center md:text-left">
-            <img src={"/npg-logo.png"} alt="NPG Diseño & Cartelería" width={192} height={99} className="mx-auto mb-5 h-20 w-auto drop-shadow-[0_0_24px_rgba(118,43,255,0.6)] md:mx-0 md:h-24" />
+            <img src={"/assets/npg-logo.png"} alt="NPG Diseño & Cartelería" width={189} height={133} className="mx-auto mb-5 h-20 w-auto drop-shadow-[0_0_24px_rgba(118,43,255,0.6)] md:mx-0 md:h-24" />
             <h1 className="text-[clamp(2.55rem,6vw,4.5rem)] leading-[0.96] tracking-[-0.055em]">
               <span className="block">Hacemos</span>
               <span className="block">que tu</span>

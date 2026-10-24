@@ -52,7 +52,7 @@ export function SiteHeader() {
   return (
     <nav className="glass sticky top-0 z-40 border-b border-border">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-        <Link to="/" aria-label="NPG — Inicio"><img src={"/npg-logo.png"} alt="NPG Diseño & Cartelería" width={192} height={99} className="h-8 w-auto" /></Link>
+        <Link to="/" aria-label="NPG — Inicio"><img src={"/assets/npg-logo.png"} alt="NPG Diseño & Cartelería" width={189} height={133} className="h-8 w-auto" /></Link>
         <AccountLinks />
       </div>
     </nav>

@@ -12,7 +12,7 @@ export function CheckoutHeader() {
         <Button asChild variant="ghost" size="icon" className="absolute left-4" title="Volver a mis pedidos">
           <Link to="/pedidos" aria-label="Volver a mis pedidos"><ArrowLeft /></Link>
         </Button>
-        <Link to="/" aria-label="NPG — Inicio"><img src={"/npg-logo.png"} alt="NPG Diseño & Cartelería" className="checkout-logo h-20 w-20 object-contain" /></Link>
+        <Link to="/" aria-label="NPG — Inicio"><img src={"/assets/npg-logo.png"} alt="NPG Diseño & Cartelería" className="checkout-logo h-20 w-20 object-contain" /></Link>
         <Button asChild variant="ghost" size="icon" className="absolute right-4" title="Mis pedidos">
           <Link to="/pedidos" aria-label="Mis pedidos"><ShoppingBag className="size-6" /></Link>
         </Button>
