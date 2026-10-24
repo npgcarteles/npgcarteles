@@ -19,6 +19,28 @@ const trChipa = "/assets/trabajo-senor-chipa.png";
 const trQueso = "/assets/trabajo-punto-queso.png";
 const WHATSAPP = "5492975169780";
 
+async function prepareImageForGeneration(source: Blob, name: string): Promise<File> {
+  const bitmap = await createImageBitmap(source);
+  try {
+    const maxDimension = 1280;
+    const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("No se pudieron preparar las imágenes para generar el montaje.");
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const compressed = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("No se pudieron comprimir las imágenes.")), "image/webp", 0.78);
+    });
+    const extension = compressed.type === "image/webp" ? "webp" : "png";
+    return new File([compressed], `${name}.${extension}`, { type: compressed.type || "image/png" });
+  } finally {
+    bitmap.close();
+  }
+}
+
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -231,15 +253,21 @@ function Index() {
     const startedRevision = revision.current;
     try {
       const form = new FormData();
-      form.append("image[]", foto);
-      form.append("image[]", logo);
-      const references = await Promise.all([trBocados, trChipa].map(async (url) => {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("No se pudieron cargar las fotos de referencia de NPG. Probá de nuevo.");
-        return response.blob();
-      }));
-      references.forEach((image, i) => form.append("image[]", image, `trabajo-npg-${i + 1}.png`));
-      form.append("prompt", buildPrompt(cfg));
+      const [photoForGeneration, logoForGeneration, referenceResults] = await Promise.all([
+        prepareImageForGeneration(foto, "foto-local"),
+        prepareImageForGeneration(logo, "logo"),
+        Promise.allSettled([trBocados, trChipa].map(async (url, index) => {
+          const response = await fetch(url);
+          if (!response.ok) return null;
+          return prepareImageForGeneration(await response.blob(), `trabajo-npg-${index + 1}`);
+        })),
+      ]);
+      const references = referenceResults.flatMap((item) => item.status === "fulfilled" && item.value ? [item.value] : []);
+      const imagesForGeneration = [photoForGeneration, logoForGeneration, ...references];
+      const imageBytes = imagesForGeneration.reduce((total, image) => total + image.size, 0);
+      if (imageBytes > 3.75 * 1024 * 1024) throw new Error("Las imágenes siguen siendo muy pesadas. Probá con archivos más livianos.");
+      imagesForGeneration.forEach((image) => form.append("image[]", image, image.name));
+      form.append("prompt", buildPrompt(cfg, references.length));
       form.append("size", "auto");
       form.append("quality", "high");
       await streamImage("/api/edit-image", form, (src, isFinal) => {

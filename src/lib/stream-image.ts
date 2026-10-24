@@ -31,7 +31,11 @@ export async function streamImage(
   };
   const res = await send(true);
   if (!res.ok || !res.body) {
-    throw new Error(`Image generation failed: ${res.status} ${await res.text().catch(() => "")}`);
+    const body = await res.text().catch(() => "");
+    if (res.status === 413 || body.includes("FUNCTION_PAYLOAD_TOO_LARGE")) {
+      throw new Error("Las imágenes superan el tamaño permitido para generar el montaje. Probá con archivos más livianos.");
+    }
+    throw new Error(`Image generation failed: ${res.status} ${body}`);
   }
 
   let sawCompleted = false;
