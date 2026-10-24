@@ -5,8 +5,8 @@ export const Route = createFileRoute("/api/edit-image")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env["LOVABLE_API_KEY"];
-        if (!apiKey) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
+        const apiKey = process.env["OPENAI_API_KEY"];
+        if (!apiKey) return new Response("Missing OPENAI_API_KEY", { status: 500 });
         const form = await request.formData();
         const upstream = await editImage({ ...imageSettings, apiKey }, form);
         return new Response(upstream.body, {
@@ -20,3 +20,4 @@ export const Route = createFileRoute("/api/edit-image")({
     },
   },
 });
+
