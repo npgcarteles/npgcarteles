@@ -9,7 +9,7 @@ const MAX_PRUEBAS = 2;
 import { Award, Box, Brush, Check, Download, HeartHandshake, ImagePlus, Lightbulb, Loader2, Menu, MessageCircle, Palette, PenTool, Printer, Rocket, Sparkles, Store, Users, X, Layers, Wand2 } from "lucide-react";
 import spaceBg from "@/assets/space-bg.jpg";
 import alien from "@/assets/alien.png";
-import { streamImage } from "@/lib/stream-image";
+import { OPENAI_QUOTA_ERROR, streamImage } from "@/lib/stream-image";
 import { Button } from "@/components/ui/button";
 import { buildPrompt, ILUMINACION, TIPOS, PERSONALIZADOS, type SignConfig } from "@/lib/sign-prompt";
 
@@ -39,7 +39,6 @@ async function prepareImageForGeneration(source: Blob, name: string): Promise<Fi
     bitmap.close();
   }
 }
-
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -114,7 +113,7 @@ function Nav() {
   return (
     <nav className="glass fixed inset-x-0 top-0 z-50 border-b border-border">
       <div className="mx-auto flex h-12 max-w-7xl items-center justify-between px-[clamp(1.5rem,9vw,5.5rem)]">
-        <a href="#inicio" aria-label="NPG Diseño & Cartelería — Inicio"><img src={"/assets/npg-logo.png"} alt="NPG Diseño & Cartelería" width={189} height={133} className="h-8 w-auto" /></a>
+        <a href="#inicio" aria-label="NPG Diseño & Cartelería — Inicio"><img src="/assets/npg-logo.png" alt="NPG Diseño & Cartelería" width={189} height={133} className="h-8 w-auto" /></a>
         <ul className="hidden gap-7 text-sm md:flex">
           {NAV.map((n) => (
             <li key={n.id}><a href={`#${n.id}`} className="text-muted-foreground transition hover:text-foreground">{n.label}</a></li>
@@ -235,18 +234,36 @@ function Index() {
   const [ancho, setAncho] = useState("3");
   const [alto, setAlto] = useState("0.6");
   const [usadas, setUsadas] = useState(0);
+  const [limiteVerificado, setLimiteVerificado] = useState(false);
   const [misDisenos, setMisDisenos] = useState<{ id: number; image: string; name: string; width: number; height: number }[]>([]);
   const [paying, setPaying] = useState(false);
   useEffect(() => {
-    setUsadas(Number(localStorage.getItem("npg-pruebas") || 0));
     try { setMisDisenos(JSON.parse(localStorage.getItem("Mis diseños") || "[]")); } catch { setMisDisenos([]); }
+    let active = true;
+    fetch("/api/generation-usage", { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json() as { used?: number; error?: string };
+        if (!response.ok || typeof data.used !== "number") throw new Error(data.error || "No se pudo consultar el límite de muestras.");
+        if (active) { setUsadas(data.used); setLimiteVerificado(true); }
+      })
+      .catch(() => { if (active) setError("No se pudo verificar el límite de muestras. Probá recargar la página."); });
+    return () => { active = false; };
   }, []);
   const restantes = Math.max(0, MAX_PRUEBAS - usadas);
   useEffect(() => { revision.current += 1; setResult(null); setFinal(false); setError(null); }, [foto, logo, cfg]);
   const setMedida = (a: string, h: string) => { setAncho(a); setAlto(h); setCfg((c) => ({ ...c, tamano: `${a} m de ancho x ${h} m de alto` })); };
   const set = (k: keyof SignConfig) => (v: string) => setCfg((c) => ({ ...c, [k]: v }));
 
+  async function actualizarUso() {
+    const response = await fetch("/api/generation-usage", { cache: "no-store" });
+    const data = await response.json() as { used?: number; error?: string };
+    if (!response.ok || typeof data.used !== "number") throw new Error(data.error || "No se pudo consultar el límite de muestras.");
+    setUsadas(data.used);
+    setLimiteVerificado(true);
+  }
+
   async function generar() {
+    if (!limiteVerificado) return setError("Estamos verificando el límite de muestras. Probá de nuevo en un momento.");
     if (restantes <= 0) return setError("Ya usaste tus 2 pruebas con IA. Escribinos por WhatsApp para seguir con tu proyecto.");
     if (!foto || !logo) return setError("Subí la foto del local y el logo.");
     setError(null); setLoading(true); setResult(null); setFinal(false);
@@ -292,11 +309,11 @@ function Index() {
         }
       });
       if (revision.current !== startedRevision) throw new Error("La configuración cambió. Generá un montaje nuevo.");
-      const n = usadas + 1;
-      localStorage.setItem("npg-pruebas", String(n)); setUsadas(n);
+      await actualizarUso();
     } catch (e) {
       setResult(null); setFinal(false);
       setError(e instanceof Error ? e.message : "No se pudo generar la simulación.");
+      try { await actualizarUso(); } catch { setLimiteVerificado(false); }
     } finally {
       setLoading(false);
     }
@@ -343,7 +360,7 @@ function Index() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40" />
         <div className="relative mx-auto grid w-full max-w-7xl items-center gap-8 px-[clamp(1.5rem,9vw,5.5rem)] py-12 md:grid-cols-2 md:gap-12">
           <div className="animate-rise text-center md:text-left">
-            <img src={"/assets/npg-logo.png"} alt="NPG Diseño & Cartelería" width={189} height={133} className="mx-auto mb-5 h-20 w-auto drop-shadow-[0_0_24px_rgba(118,43,255,0.6)] md:mx-0 md:h-24" />
+            <img src="/assets/npg-logo.png" alt="NPG Diseño & Cartelería" width={189} height={133} className="mx-auto mb-5 h-20 w-auto drop-shadow-[0_0_24px_rgba(118,43,255,0.6)] md:mx-0 md:h-24" />
             <h1 className="text-[clamp(2.55rem,6vw,4.5rem)] leading-[0.96] tracking-[-0.055em]">
               <span className="block">Hacemos</span>
               <span className="block">que tu</span>
@@ -419,11 +436,16 @@ function Index() {
             </Step>
 
             <Step n={3} title="Generá la simulación" done={ready}>
-              <Button onClick={generar} disabled={loading || !foto || !logo}
+              <Button onClick={generar} disabled={loading || !limiteVerificado || restantes === 0 || !foto || !logo}
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-brand py-4 font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60">
-                {loading ? <><Loader2 className="h-5 w-5 animate-spin" /> Generando simulación…</> : <><Wand2 className="h-5 w-5" /> Generar montaje ({restantes} de {MAX_PRUEBAS} pruebas)</>}
+                {loading ? <><Loader2 className="h-5 w-5 animate-spin" /> Generando simulación…</> : !limiteVerificado ? <><Loader2 className="h-5 w-5 animate-spin" /> Verificando muestras…</> : <><Wand2 className="h-5 w-5" /> Generar montaje ({restantes} de {MAX_PRUEBAS} pruebas)</>}
               </Button>
-              {error && <p role="alert" className="mt-4 rounded-xl border border-destructive/50 bg-destructive/10 px-4 py-3 text-destructive">{error}</p>}
+              {error && <p role="alert" className="mt-4 rounded-xl border border-destructive/50 bg-destructive/10 px-4 py-3 text-destructive">
+                {error === OPENAI_QUOTA_ERROR ? <>
+                  La API de OpenAI está conectada, pero la cuenta no tiene créditos disponibles. Agregá saldo o usá una clave de un proyecto con facturación activa.{" "}
+                  <a href="https://platform.openai.com/settings/organization/billing" target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-2">Abrir facturación de OpenAI</a>
+                </> : error}
+              </p>}
               {ready && <p className="mt-4 flex items-center gap-2 text-success"><Sparkles className="h-4 w-4" /> ¡Simulación lista!</p>}
               {result ? (
                 <img src={result} alt="Simulación del cartel" className={`mt-6 w-full rounded-2xl border border-border transition-[filter] duration-700 ${final ? "blur-0" : "blur-2xl"}`} />
@@ -535,6 +557,7 @@ function Index() {
     </main>
   );
 }
+
 
 
 
