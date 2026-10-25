@@ -235,6 +235,7 @@ function Index() {
   const [alto, setAlto] = useState("0.6");
   const [usadas, setUsadas] = useState(0);
   const [limiteVerificado, setLimiteVerificado] = useState(false);
+  const [verificandoLimite, setVerificandoLimite] = useState(true);
   const [misDisenos, setMisDisenos] = useState<{ id: number; image: string; name: string; width: number; height: number }[]>([]);
   const [paying, setPaying] = useState(false);
   useEffect(() => {
@@ -246,7 +247,8 @@ function Index() {
         if (!response.ok || typeof data.used !== "number") throw new Error(data.error || "No se pudo consultar el límite de muestras.");
         if (active) { setUsadas(data.used); setLimiteVerificado(true); }
       })
-      .catch(() => { if (active) setError("No se pudo verificar el límite de muestras. Probá recargar la página."); });
+      .catch(() => { if (active) setError("No se pudo verificar el límite de muestras. Tocá el botón para reintentar."); })
+      .finally(() => { if (active) setVerificandoLimite(false); });
     return () => { active = false; };
   }, []);
   const restantes = Math.max(0, MAX_PRUEBAS - usadas);
@@ -260,6 +262,18 @@ function Index() {
     if (!response.ok || typeof data.used !== "number") throw new Error(data.error || "No se pudo consultar el límite de muestras.");
     setUsadas(data.used);
     setLimiteVerificado(true);
+  }
+
+  async function handleGenerateClick() {
+    if (!limiteVerificado) {
+      setVerificandoLimite(true);
+      setError(null);
+      try { await actualizarUso(); }
+      catch (e) { setError(e instanceof Error ? e.message : "No se pudo verificar el límite de muestras."); }
+      finally { setVerificandoLimite(false); }
+      return;
+    }
+    await generar();
   }
 
   async function generar() {
@@ -436,9 +450,9 @@ function Index() {
             </Step>
 
             <Step n={3} title="Generá la simulación" done={ready}>
-              <Button onClick={generar} disabled={loading || !limiteVerificado || restantes === 0 || !foto || !logo}
+              <Button onClick={handleGenerateClick} disabled={loading || verificandoLimite || (limiteVerificado && restantes === 0) || !foto || !logo}
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-brand py-4 font-display text-sm text-primary-foreground shadow-glow transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60">
-                {loading ? <><Loader2 className="h-5 w-5 animate-spin" /> Generando simulación…</> : !limiteVerificado ? <><Loader2 className="h-5 w-5 animate-spin" /> Verificando muestras…</> : <><Wand2 className="h-5 w-5" /> Generar montaje ({restantes} de {MAX_PRUEBAS} pruebas)</>}
+                {loading ? <><Loader2 className="h-5 w-5 animate-spin" /> Generando simulación…</> : verificandoLimite ? <><Loader2 className="h-5 w-5 animate-spin" /> Verificando muestras…</> : !limiteVerificado ? <><Wand2 className="h-5 w-5" /> Reintentar verificación</> : <><Wand2 className="h-5 w-5" /> Generar montaje ({restantes} de {MAX_PRUEBAS} pruebas)</>}
               </Button>
               {error && <p role="alert" className="mt-4 rounded-xl border border-destructive/50 bg-destructive/10 px-4 py-3 text-destructive">
                 {error === OPENAI_QUOTA_ERROR ? <>
