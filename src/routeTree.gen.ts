@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ApiAnalyzeFacadeRouteImport } from './routes/api/analyze-facade'
 import { Route as ApiEditImageRouteImport } from './routes/api/edit-image'
+import { Route as ApiGenerationUsageRouteImport } from './routes/api/generation-usage'
 import { Route as ApiMercadopagoRouteImport } from './routes/api/mercadopago'
 import { Route as AuthenticatedPedidoNuevoRouteImport } from './routes/_authenticated/pedido.nuevo'
 import { Route as AuthenticatedPedidosIndexRouteImport } from './routes/_authenticated/pedidos.index'
@@ -48,6 +49,11 @@ const ApiAnalyzeFacadeRoute = ApiAnalyzeFacadeRouteImport.update({
 const ApiEditImageRoute = ApiEditImageRouteImport.update({
   id: '/api/edit-image',
   path: '/api/edit-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGenerationUsageRoute = ApiGenerationUsageRouteImport.update({
+  id: '/api/generation-usage',
+  path: '/api/generation-usage',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiMercadopagoRoute = ApiMercadopagoRouteImport.update({
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/api/analyze-facade': typeof ApiAnalyzeFacadeRoute
   '/api/edit-image': typeof ApiEditImageRoute
+  '/api/generation-usage': typeof ApiGenerationUsageRoute
   '/api/mercadopago': typeof ApiMercadopagoRoute
   '/pedido/nuevo': typeof AuthenticatedPedidoNuevoRoute
   '/pedidos/$id': typeof AuthenticatedPedidosIdRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/api/analyze-facade': typeof ApiAnalyzeFacadeRoute
   '/api/edit-image': typeof ApiEditImageRoute
+  '/api/generation-usage': typeof ApiGenerationUsageRoute
   '/api/mercadopago': typeof ApiMercadopagoRoute
   '/pedido/nuevo': typeof AuthenticatedPedidoNuevoRoute
   '/pedidos/$id': typeof AuthenticatedPedidosIdRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/api/analyze-facade': typeof ApiAnalyzeFacadeRoute
   '/api/edit-image': typeof ApiEditImageRoute
+  '/api/generation-usage': typeof ApiGenerationUsageRoute
   '/api/mercadopago': typeof ApiMercadopagoRoute
   '/_authenticated/pedido/nuevo': typeof AuthenticatedPedidoNuevoRoute
   '/_authenticated/pedidos/$id': typeof AuthenticatedPedidosIdRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/api/analyze-facade'
     | '/api/edit-image'
+    | '/api/generation-usage'
     | '/api/mercadopago'
     | '/pedido/nuevo'
     | '/pedidos/$id'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/api/analyze-facade'
     | '/api/edit-image'
+    | '/api/generation-usage'
     | '/api/mercadopago'
     | '/pedido/nuevo'
     | '/pedidos/$id'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/api/analyze-facade'
     | '/api/edit-image'
+    | '/api/generation-usage'
     | '/api/mercadopago'
     | '/_authenticated/pedido/nuevo'
     | '/_authenticated/pedidos/$id'
@@ -163,6 +175,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ApiAnalyzeFacadeRoute: typeof ApiAnalyzeFacadeRoute
   ApiEditImageRoute: typeof ApiEditImageRoute
+  ApiGenerationUsageRoute: typeof ApiGenerationUsageRoute
   ApiMercadopagoRoute: typeof ApiMercadopagoRoute
   ApiPublicMercadopagoWebhookRoute: typeof ApiPublicMercadopagoWebhookRoute
 }
@@ -209,6 +222,13 @@ declare module '@tanstack/react-router' {
       path: '/api/edit-image'
       fullPath: '/api/edit-image'
       preLoaderRoute: typeof ApiEditImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/generation-usage': {
+      id: '/api/generation-usage'
+      path: '/api/generation-usage'
+      fullPath: '/api/generation-usage'
+      preLoaderRoute: typeof ApiGenerationUsageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/mercadopago': {
@@ -272,6 +292,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ApiAnalyzeFacadeRoute: ApiAnalyzeFacadeRoute,
   ApiEditImageRoute: ApiEditImageRoute,
+  ApiGenerationUsageRoute: ApiGenerationUsageRoute,
   ApiMercadopagoRoute: ApiMercadopagoRoute,
   ApiPublicMercadopagoWebhookRoute: ApiPublicMercadopagoWebhookRoute,
 }
@@ -288,3 +309,4 @@ declare module '@tanstack/react-start' {
     config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }
+
