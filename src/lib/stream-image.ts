@@ -1,7 +1,34 @@
 import { createParser } from "eventsource-parser";
 import { flushSync } from "react-dom";
 
-type ImagePayload = { type?: string; b64_json?: string; error?: { message?: string } };
+type ImagePayload = { type?: string; b64_json?: string; error?: { code?: string; type?: string; message?: string } };
+
+export const OPENAI_QUOTA_ERROR = "OPENAI_QUOTA_ERROR";
+
+function isQuotaError(code?: string, message = "", status?: number) {
+  return (
+    code === "insufficient_quota" ||
+    code === "credit_balance_exhausted" ||
+    code === "billing_hard_limit_reached" ||
+    (status === 429 && /quota|credit|billing/i.test(message))
+  );
+}
+
+function formatImageError(status: number, body: string): string {
+  if (status === 413 || body.includes("FUNCTION_PAYLOAD_TOO_LARGE")) {
+    return "Las imágenes superan el tamaño permitido para generar el montaje. Probá con archivos más livianos.";
+  }
+  try {
+    const payload = JSON.parse(body) as { error?: { code?: string; type?: string; message?: string } };
+    const code = payload.error?.code ?? payload.error?.type;
+    const message = payload.error?.message ?? "";
+    if (isQuotaError(code, message, status)) return OPENAI_QUOTA_ERROR;
+    if (message) return `No se pudo generar la imagen (${status}). ${message}`;
+  } catch {
+    // Keep non-JSON errors readable below.
+  }
+  return `No se pudo generar la imagen (${status}). ${body.slice(0, 500)}`;
+}
 
 export async function streamImage(
   endpoint: string,
@@ -31,11 +58,7 @@ export async function streamImage(
   };
   const res = await send(true);
   if (!res.ok || !res.body) {
-    const body = await res.text().catch(() => "");
-    if (res.status === 413 || body.includes("FUNCTION_PAYLOAD_TOO_LARGE")) {
-      throw new Error("Las imágenes superan el tamaño permitido para generar el montaje. Probá con archivos más livianos.");
-    }
-    throw new Error(`Image generation failed: ${res.status} ${body}`);
+    throw new Error(formatImageError(res.status, await res.text().catch(() => "")));
   }
 
   let sawCompleted = false;
@@ -51,7 +74,10 @@ export async function streamImage(
       }
       if (event.event === "error" || payload?.type === "error") {
         sawAnyEvent = true;
-        streamError = payload?.error?.message ?? "Image generation failed";
+        const providerError = payload?.error;
+        streamError = isQuotaError(providerError?.code ?? providerError?.type, providerError?.message)
+          ? OPENAI_QUOTA_ERROR
+          : providerError?.message ?? "No se pudo generar la imagen.";
         return;
       }
       const type = event.event || payload?.type;
@@ -95,7 +121,7 @@ export async function streamImage(
   if (!sawAnyEvent) {
     const replay = await send(false);
     if (!replay.ok) {
-      throw new Error(`Image generation failed: ${replay.status} ${await replay.text().catch(() => "")}`);
+      throw new Error(formatImageError(replay.status, await replay.text().catch(() => "")));
     }
     const json = (await replay.json()) as { data?: { b64_json?: string }[] };
     const b64 = json.data?.[0]?.b64_json;
@@ -105,3 +131,4 @@ export async function streamImage(
   }
   if (!sawCompleted) throw new Error("Image stream ended without a completed event");
 }
+
