@@ -13,7 +13,13 @@ export const Route = createFileRoute("/api/generation-usage")({
           });
         } catch (error) {
           console.error("[generation-usage] No se pudo leer el límite", error);
-          return Response.json({ error: "No se pudo consultar el límite de muestras." }, { status: 503 });
+          const code = error && typeof error === "object" && "code" in error && typeof error.code === "string"
+            ? error.code
+            : error instanceof Error ? error.name : "SUPABASE_ERROR";
+          return Response.json({ error: "No se pudo consultar el límite de muestras.", code }, {
+            status: 503,
+            headers: { "Cache-Control": "no-store" },
+          });
         }
       },
     },
