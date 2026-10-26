@@ -243,8 +243,8 @@ function Index() {
     let active = true;
     fetch("/api/generation-usage", { cache: "no-store" })
       .then(async (response) => {
-        const data = await response.json() as { used?: number; error?: string };
-        if (!response.ok || typeof data.used !== "number") throw new Error(data.error || "No se pudo consultar el límite de muestras.");
+        const data = await response.json() as { used?: number; error?: string; code?: string };
+        if (!response.ok || typeof data.used !== "number") throw new Error(`${data.error || "No se pudo consultar el límite de muestras."}${data.code ? ` (${data.code})` : ""}`);
         if (active) { setUsadas(data.used); setLimiteVerificado(true); }
       })
       .catch(() => { if (active) setError("No se pudo verificar el límite de muestras. Tocá el botón para reintentar."); })
@@ -258,8 +258,8 @@ function Index() {
 
   async function actualizarUso() {
     const response = await fetch("/api/generation-usage", { cache: "no-store" });
-    const data = await response.json() as { used?: number; error?: string };
-    if (!response.ok || typeof data.used !== "number") throw new Error(data.error || "No se pudo consultar el límite de muestras.");
+    const data = await response.json() as { used?: number; error?: string; code?: string };
+    if (!response.ok || typeof data.used !== "number") throw new Error(`${data.error || "No se pudo consultar el límite de muestras."}${data.code ? ` (${data.code})` : ""}`);
     setUsadas(data.used);
     setLimiteVerificado(true);
   }
