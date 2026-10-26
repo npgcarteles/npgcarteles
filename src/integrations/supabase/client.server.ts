@@ -9,6 +9,12 @@ function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith('sb_publishable_') || value.startsWith('sb_secret_');
 }
 
+function normalizeSupabaseUrl(value: string): string {
+  const url = new URL(value.trim());
+  url.pathname = url.pathname.replace(/\/(?:rest|auth|storage|functions|realtime)\/v1\/?$/i, '');
+  return url.toString().replace(/\/$/, '');
+}
+
 function createSupabaseFetch(supabaseKey: string): typeof fetch {
   return (input, init) => {
     const headers = new Headers(
@@ -30,7 +36,8 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 function createSupabaseAdminClient() {
-  const SUPABASE_URL = process.env['SUPABASE_URL'];
+  const configuredUrl = process.env['SUPABASE_URL'];
+  const SUPABASE_URL = configuredUrl ? normalizeSupabaseUrl(configuredUrl) : undefined;
   const SUPABASE_SERVICE_ROLE_KEY = process.env['SUPABASE_SERVICE_ROLE_KEY'];
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -67,3 +74,4 @@ export const supabaseAdmin = new Proxy({} as ReturnType<typeof createSupabaseAdm
     return Reflect.get(_supabaseAdmin, prop, receiver);
   },
 });
+
